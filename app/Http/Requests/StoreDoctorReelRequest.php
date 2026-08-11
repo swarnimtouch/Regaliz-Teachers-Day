@@ -17,8 +17,6 @@ class StoreDoctorReelRequest extends FormRequest
             'doctor_name' => ['required', 'string', 'max:100'],
             'speciality' => ['required', 'string', 'max:100'],
             'city' => ['required', 'string', 'max:100'],
-            'mobile' => ['nullable', 'regex:/^[0-9+() -]{7,20}$/'],
-            'hospital_name' => ['nullable', 'string', 'max:150'],
             'consent' => ['accepted'],
         ];
     }

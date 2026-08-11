@@ -6,7 +6,6 @@
         <div class="eyebrow"><span>✦</span> A Teacher's Day Celebration</div>
         <h1>For the mentors who made us <em>who we are.</em></h1>
         <p>Record a heartfelt message and turn it into a beautiful, shareable tribute—in less than a minute.</p>
-        <div class="hero-actions"><a class="btn-gold" href="{{ route('campaign.create') }}">Create your reel <span>→</span></a><span class="tiny-note">No app needed · Takes 60 seconds</span></div>
     </div>
     <div class="hero-art" aria-hidden="true">
         <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
@@ -19,5 +18,5 @@
     <article><b>02</b><div class="step-icon">◉</div><h3>Record your message</h3><p>Speak from the heart for 5–20 seconds using your front camera.</p></article>
     <article><b>03</b><div class="step-icon">✦</div><h3>Share your gratitude</h3><p>We craft a vertical Teacher's Day reel, ready to download and share.</p></article>
 </div></section>
-<section class="quote-band"><span>“</span><p>The influence of a good teacher can never be erased.</p><a href="{{ route('campaign.create') }}">Begin your tribute →</a></section>
+<section class="quote-band"><span>“</span><p>The influence of a good teacher can never be erased.</p></section>
 @endsection

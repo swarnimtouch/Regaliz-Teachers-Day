@@ -11,6 +11,14 @@ class CampaignFlowTest extends TestCase
 
     public function test_doctor_details_redirect_to_format_selection_then_video_recording(): void
     {
+        $this->get('/create')->assertNotFound();
+
+        $this->get(route('campaign.landing'))
+            ->assertOk()
+            ->assertSee('Enter your full name')
+            ->assertDontSee('name="mobile"', false)
+            ->assertDontSee('name="hospital_name"', false);
+
         $response = $this->post(route('campaign.store'), [
             'doctor_name' => 'Dr Aanya Sharma',
             'speciality' => 'Cardiology',

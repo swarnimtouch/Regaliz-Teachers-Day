@@ -18,7 +18,6 @@
             <img class="company-logo" src="{{ $campaignLogoUrl }}" alt="Campaign logo">
             <span><b>{{ $campaignTitle }}</b><small>{{ $campaignSubtitle }}</small></span>
         </a>
-        <a class="header-link" href="{{ route('campaign.create') }}">Create your reel <span>→</span></a>
     </header>
     <main>@yield('content')</main>
     <footer><span>Made with gratitude for the teachers who shape tomorrow.</span><span>© {{ date('Y') }} Teacher's Day</span></footer>

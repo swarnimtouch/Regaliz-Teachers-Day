@@ -4,22 +4,21 @@
 
 @section('content')
 <section class="form-page section-wrap">
-    <div class="form-intro">
-        <div class="eyebrow"><span>01</span> Your details</div>
-        <h1>Let's make it <em>personal.</em></h1>
-        <p>These details will appear beautifully on your reel.</p>
-        <div class="quote-mini">"Teaching is the profession that creates all other professions."</div>
+    <div class="hero-art registration-mentor" aria-hidden="true">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="portrait-card"><div class="portrait-ring"><div class="teacher-icon">✦<span>MENTOR</span></div></div><p>“A teacher takes a hand,<br>opens a mind & touches a heart.”</p></div>
+        <span class="float-icon book">▰</span><span class="float-icon star">✦</span><span class="float-icon pen">✎</span>
     </div>
 
-    <form id="registrationForm" class="premium-form" method="POST" action="{{ route('campaign.store') }}" novalidate>
+    <form id="registrationForm" class="premium-form registration-form" method="POST" action="{{ route('campaign.store') }}" novalidate>
         @csrf
         @if ($errors->any())
             <div class="alert-error">Please check the highlighted fields.</div>
         @endif
 
         <label>
-            Doctor name <span>*</span>
-            <input name="doctor_name" value="{{ old('doctor_name') }}" placeholder="Dr. Aanya Sharma" maxlength="100" autocomplete="name">
+            Name <span>*</span>
+            <input name="doctor_name" value="{{ old('doctor_name') }}" placeholder="Enter your full name" maxlength="100" autocomplete="name">
             <small class="field-error" data-error-for="doctor_name">@error('doctor_name'){{ $message }}@enderror</small>
         </label>
 
@@ -33,19 +32,6 @@
                 City <span>*</span>
                 <input name="city" value="{{ old('city') }}" placeholder="Mumbai" maxlength="100">
                 <small class="field-error" data-error-for="city">@error('city'){{ $message }}@enderror</small>
-            </label>
-        </div>
-
-        <div class="form-grid">
-            <label>
-                Mobile <i>Optional</i>
-                <input name="mobile" value="{{ old('mobile') }}" placeholder="+91 98765 43210" inputmode="tel" maxlength="20" autocomplete="tel">
-                <small class="field-error" data-error-for="mobile">@error('mobile'){{ $message }}@enderror</small>
-            </label>
-            <label>
-                Hospital <i>Optional</i>
-                <input name="hospital_name" value="{{ old('hospital_name') }}" placeholder="City Care Hospital" maxlength="150">
-                <small class="field-error" data-error-for="hospital_name">@error('hospital_name'){{ $message }}@enderror</small>
             </label>
         </div>
 
@@ -66,11 +52,9 @@
 const registrationForm = document.querySelector('#registrationForm');
 const registrationSubmit = document.querySelector('#registrationSubmit');
 const rules = {
-    doctor_name: value => value.length >= 2 ? '' : 'Please enter the doctor name.',
+    doctor_name: value => value.length >= 2 ? '' : 'Please enter your name.',
     speciality: value => value.length >= 2 ? '' : 'Please enter the speciality.',
     city: value => value.length >= 2 ? '' : 'Please enter the city.',
-    mobile: value => !value || /^[0-9+() -]{7,20}$/.test(value) ? '' : 'Enter a valid mobile number.',
-    hospital_name: value => value.length <= 150 ? '' : 'Hospital name must be within 150 characters.',
     consent: value => value ? '' : 'Please accept the consent checkbox to continue.',
 };
 

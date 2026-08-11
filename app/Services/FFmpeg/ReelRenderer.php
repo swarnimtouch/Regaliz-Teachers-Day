@@ -33,7 +33,7 @@ class ReelRenderer
         $videoHeight = (int) round(589 * $zoom);
         $cropX = (int) floor(($videoWidth - 619) / 2);
         $cropY = (int) floor(($videoHeight - 589) / 2);
-        $filter = "[1:v]split=3[introbase][middlebase][outrobase];[introbase]trim=start=0:end=8.7,setpts=PTS-STARTPTS[intro];[middlebase]trim=start=12:end=12.04,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration={$duration},trim=duration={$duration}[middle];[outrobase]trim=start=14,setpts=PTS-STARTPTS[outro];[0:v]hflip,scale={$videoWidth}:{$videoHeight}:force_original_aspect_ratio=increase,crop=619:589:{$cropX}:{$cropY},trim=duration={$duration},setpts=PTS-STARTPTS[doctor];[middle][2:v]overlay=0:0,trim=duration={$duration}[cleanmiddle];[cleanmiddle][doctor]overlay=219:687:shortest=1,tpad=stop_mode=clone:stop_duration=1,trim=duration={$duration}[message];[intro][message][outro]concat=n=3:v=1:a=0,format=yuv420p[v];[1:a]asplit=2[introaudio][outroaudio];[introaudio]atrim=start=0:end=8.7,asetpts=PTS-STARTPTS[ia];[0:a]atrim=duration={$duration},asetpts=PTS-STARTPTS[messageaudio];[outroaudio]atrim=start=14,asetpts=PTS-STARTPTS[oa];[ia][messageaudio][oa]concat=n=3:v=0:a=1[a]";
+        $filter = "[1:v]split=3[introbase][middlebase][outrobase];[introbase]trim=start=0:end=8.7,setpts=PTS-STARTPTS[intro];[middlebase]trim=start=12:end=12.04,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration={$duration},trim=duration={$duration}[middle];[outrobase]trim=start=14.4,setpts=PTS-STARTPTS[outro];[0:v]hflip,scale={$videoWidth}:{$videoHeight}:force_original_aspect_ratio=increase,crop=619:589:{$cropX}:{$cropY},setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=1,trim=duration={$duration}[doctor];[middle][2:v]overlay=0:0,trim=duration={$duration}[cleanmiddle];[cleanmiddle][doctor]overlay=219:687:eof_action=repeat,trim=duration={$duration}[message];[intro][message][outro]concat=n=3:v=1:a=0,format=yuv420p[v];[1:a]asplit=2[introaudio][outroaudio];[introaudio]atrim=start=0:end=8.7,asetpts=PTS-STARTPTS[ia];[0:a]atrim=duration={$duration},asetpts=PTS-STARTPTS[messageaudio];[outroaudio]atrim=start=14.4,asetpts=PTS-STARTPTS[oa];[ia][messageaudio][oa]concat=n=3:v=0:a=1[a]";
 
         $result = Process::timeout(300)->run([
             config('services.ffmpeg.binary', 'ffmpeg'), '-y', '-i', $inputPath, '-i', $templatePath,
@@ -56,12 +56,14 @@ class ReelRenderer
         $probe = str_contains($ffmpeg, DIRECTORY_SEPARATOR)
             ? dirname($ffmpeg).DIRECTORY_SEPARATOR.(PHP_OS_FAMILY === 'Windows' ? 'ffprobe.exe' : 'ffprobe')
             : 'ffprobe';
-        $result = Process::timeout(30)->run([$probe, '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', $path]);
-        $duration = (float) trim($result->output());
+        $result = Process::timeout(30)->run([$probe, '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'frame=best_effort_timestamp_time', '-of', 'csv=p=0', $path]);
+        $timestamps = array_values(array_filter(array_map('trim', preg_split('/\R/', $result->output()) ?: []), 'strlen'));
+        $lastFrame = (float) ($timestamps[array_key_last($timestamps)] ?? 0);
+        $duration = $lastFrame + (1 / 30);
         if ($result->failed() || $duration <= 0) {
             throw new RuntimeException('Unable to determine the recording duration.');
         }
 
-        return round(min(20, $duration), 3);
+        return round(max(0.1, min(20, $duration)), 3);
     }
 }

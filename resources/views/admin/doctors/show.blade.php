@@ -7,16 +7,12 @@
     <section class="admin-panel">
         <h2>Doctor details</h2>
         <dl class="detail-list">
-            <dt>Doctor name</dt>
+            <dt>Name</dt>
             <dd>{{ $reel->doctor_name }}</dd>
             <dt>Speciality</dt>
             <dd>{{ $reel->speciality }}</dd>
             <dt>City</dt>
             <dd>{{ $reel->city }}</dd>
-            <dt>Hospital</dt>
-            <dd>{{ $reel->hospital_name ?: '—' }}</dd>
-            <dt>Mobile</dt>
-            <dd>{{ $reel->mobile ?: '—' }}</dd>
             <dt>Type</dt>
             <dd>{{ ucfirst($reel->content_type) }}</dd>
             <dt>Status</dt>

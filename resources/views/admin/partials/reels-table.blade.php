@@ -3,11 +3,9 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Doctor</th>
+                <th>Name</th>
                 <th>Speciality</th>
                 <th>City</th>
-                <th>Mobile</th>
-                <th>Hospital</th>
                 <th>Type</th>
                 <th>Status</th>
                 <th>Submitted</th>
@@ -21,8 +19,6 @@
                     <td>{{ $reel->doctor_name }}</td>
                     <td>{{ $reel->speciality }}</td>
                     <td>{{ $reel->city }}</td>
-                    <td>{{ $reel->mobile ?: '—' }}</td>
-                    <td>{{ $reel->hospital_name ?: '—' }}</td>
                     <td>{{ ucfirst($reel->content_type ?: 'Not selected') }}</td>
                     <td><span class="status {{ $reel->status }}">{{ str_replace('_', ' ', $reel->status) }}</span></td>
                     <td>{{ $reel->created_at->format('d M Y, h:i A') }}</td>
@@ -30,7 +26,7 @@
                 </tr>
             @empty
                 <tr class="admin-table-empty-row">
-                    <td class="empty" colspan="10">No records found</td>
+                    <td class="empty" colspan="8">No records found</td>
                 </tr>
             @endforelse
         </tbody>

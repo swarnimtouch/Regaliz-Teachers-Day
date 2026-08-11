@@ -21,7 +21,11 @@ class AdminModulesTest extends TestCase
         $this->get(route('admin.videos.index'))->assertOk()->assertSee('Video recordings');
         $this->get(route('admin.audios.index'))->assertOk()->assertDontSee('Dr Admin Test');
         $this->get(route('admin.cards.index'))->assertOk()->assertDontSee('Dr Admin Test');
-        $this->get(route('admin.doctors.index'))->assertOk()->assertSee('Dr Admin Test');
+        $this->get(route('admin.doctors.index'))
+            ->assertOk()
+            ->assertSee('Dr Admin Test')
+            ->assertDontSee('<th>Mobile</th>', false)
+            ->assertDontSee('<th>Hospital</th>', false);
         $this->get(route('admin.doctors.index', ['search' => 'Medicine']))
             ->assertOk()
             ->assertSee('Dr Admin Test');

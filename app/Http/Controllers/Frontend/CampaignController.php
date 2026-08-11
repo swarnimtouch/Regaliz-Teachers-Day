@@ -23,11 +23,6 @@ class CampaignController extends Controller
 {
     public function index(): View
     {
-        return view('frontend.landing');
-    }
-
-    public function create(): View
-    {
         return view('frontend.form');
     }
 
@@ -86,8 +81,9 @@ class CampaignController extends Controller
                 set_time_limit(360);
             }
             GenerateDoctorReel::dispatch($doctorReel);
-        } catch (\Throwable) {
-            // The job records its detailed failure; the public flow remains friendly.
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->markDispatchFailed($doctorReel, $exception);
         }
 
         return redirect()->route('campaign.processing');
@@ -111,8 +107,9 @@ class CampaignController extends Controller
                 set_time_limit(360);
             }
             GenerateAudioReel::dispatch($doctorReel);
-        } catch (\Throwable) {
-            // The job stores a detailed failure while the public flow stays friendly.
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->markDispatchFailed($doctorReel, $exception);
         }
 
         return redirect()->route('campaign.processing');
@@ -197,5 +194,18 @@ class CampaignController extends Controller
         abort_unless($reel, 404, 'Please start by entering your details.');
 
         return $reel;
+    }
+
+    private function markDispatchFailed(DoctorReel $reel, \Throwable $exception): void
+    {
+        $reel->update([
+            'status' => 'failed',
+            'error_message' => $exception->getMessage(),
+            'processing_failed_at' => now(),
+        ]);
+        $reel->statusHistories()->create([
+            'status' => 'failed',
+            'message' => 'Reel generation could not be started.',
+        ]);
     }
 }

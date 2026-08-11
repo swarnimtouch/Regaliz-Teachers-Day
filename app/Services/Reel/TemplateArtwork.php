@@ -119,9 +119,6 @@ class TemplateArtwork
         $this->centerText($image, $reel->doctor_name, $nameSize, 1435, $purple, $font);
         $details = implode('  •  ', array_filter([$reel->speciality, $reel->city]));
         $this->centerText($image, $details, 30, 1515, $muted, $font);
-        if ($reel->hospital_name) {
-            $this->centerText($image, $reel->hospital_name, 27, 1570, $muted, $font);
-        }
         $this->centerText($image, 'Thank you for inspiring every generation', 29, 1715, $purple, $font);
         imagepng($image, $path);
         imagedestroy($image);
