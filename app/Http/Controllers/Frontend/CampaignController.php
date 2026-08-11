@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -28,12 +29,22 @@ class CampaignController extends Controller
 
     public function store(StoreDoctorReelRequest $request): RedirectResponse
     {
+        Log::info('Campaign registration submitted', [
+            'ip' => $request->ip(),
+            'session_id' => $request->session()->getId(),
+        ]);
+
         $reel = DoctorReel::query()->create($request->validated() + [
             'reference_id' => 'TDR-'.now()->format('ymd').'-'.Str::upper(Str::random(6)),
             'status' => 'awaiting_recording',
         ]);
         $reel->statusHistories()->create(['status' => 'awaiting_recording', 'message' => 'Doctor details submitted']);
         $request->session()->put('campaign_reel_id', $reel->id);
+
+        Log::info('Campaign registration stored', [
+            'reference_id' => $reel->reference_id,
+            'reel_id' => $reel->id,
+        ]);
 
         return redirect()->route('campaign.choose-format');
     }
@@ -76,11 +87,18 @@ class CampaignController extends Controller
         ]);
         ReelStatusHistory::query()->create(['doctor_reel_id' => $doctorReel->id, 'status' => 'processing', 'message' => 'Recording uploaded securely']);
 
+        Log::info('Video recording stored; dispatching reel job', [
+            'reference_id' => $doctorReel->reference_id,
+            'recording_path' => $path,
+            'queue_connection' => config('queue.default'),
+        ]);
+
         try {
             if (config('queue.default') === 'sync' && function_exists('set_time_limit')) {
                 set_time_limit(360);
             }
             GenerateDoctorReel::dispatch($doctorReel);
+            Log::info('Video reel job dispatched', ['reference_id' => $doctorReel->reference_id]);
         } catch (\Throwable $exception) {
             report($exception);
             $this->markDispatchFailed($doctorReel, $exception);
@@ -102,11 +120,18 @@ class CampaignController extends Controller
         $doctorReel->update(['original_audio' => $path, 'content_type' => 'audio', 'status' => 'processing', 'processing_started_at' => now(), 'error_message' => null]);
         $doctorReel->statusHistories()->create(['status' => 'processing', 'message' => 'Audio message uploaded securely']);
 
+        Log::info('Audio recording stored; dispatching reel job', [
+            'reference_id' => $doctorReel->reference_id,
+            'audio_path' => $path,
+            'queue_connection' => config('queue.default'),
+        ]);
+
         try {
             if (config('queue.default') === 'sync' && function_exists('set_time_limit')) {
                 set_time_limit(360);
             }
             GenerateAudioReel::dispatch($doctorReel);
+            Log::info('Audio reel job dispatched', ['reference_id' => $doctorReel->reference_id]);
         } catch (\Throwable $exception) {
             report($exception);
             $this->markDispatchFailed($doctorReel, $exception);
@@ -198,6 +223,10 @@ class CampaignController extends Controller
 
     private function markDispatchFailed(DoctorReel $reel, \Throwable $exception): void
     {
+        Log::error('Reel job dispatch failed', [
+            'reference_id' => $reel->reference_id,
+            'exception' => $exception,
+        ]);
         $reel->update([
             'status' => 'failed',
             'error_message' => $exception->getMessage(),
