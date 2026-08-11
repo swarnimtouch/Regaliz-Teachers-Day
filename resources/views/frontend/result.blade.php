@@ -11,7 +11,10 @@
         <a class="btn-gold" href="{{ route('campaign.download-card') }}">Download card ↓</a>
     @elseif($reel->status === 'completed' && $reel->generated_video)
         <video class="result-video {{ $reel->content_type === 'audio' ? 'audio-result' : '' }}" controls preload="metadata" src="{{ route('campaign.preview-reel', ['v' => $reel->processing_completed_at?->timestamp ?? now()->timestamp]) }}"></video>
-        <a class="btn-gold" href="{{ route('campaign.download') }}">Download reel ↓</a>
+        <div class="result-actions" style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
+            <a class="btn-gold" href="{{ route('campaign.download') }}">Download reel ↓</a>
+            <a class="btn-outline" href="{{ route('campaign.choose-format') }}">Back to formats</a>
+        </div>
     @else
         <div class="waiting-card">Your recording is safe. Please try recording again if generation did not complete.</div>
         <a class="btn-gold" href="{{ $reel->content_type === 'audio' ? route('campaign.record-audio') : route('campaign.record') }}">Record again</a>
