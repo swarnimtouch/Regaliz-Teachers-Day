@@ -12,6 +12,7 @@ class CampaignFlowTest extends TestCase
     public function test_doctor_details_redirect_to_format_selection_then_video_recording(): void
     {
         $this->get('/create')->assertNotFound();
+        $this->post('/create')->assertNotFound();
 
         $this->get(route('campaign.landing'))
             ->assertOk()

@@ -4,7 +4,7 @@ use App\Http\Controllers\Frontend\CampaignController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [CampaignController::class, 'index'])->name('campaign.landing');
-Route::post('/', [CampaignController::class, 'store'])->middleware('throttle:20,1')->name('campaign.store');
+Route::post('/register', [CampaignController::class, 'store'])->middleware('throttle:20,1')->name('campaign.store');
 Route::get('/choose-format', [CampaignController::class, 'chooseFormat'])->name('campaign.choose-format');
 Route::post('/choose-format', [CampaignController::class, 'selectFormat'])->name('campaign.select-format');
 Route::get('/record', [CampaignController::class, 'record'])->name('campaign.record');
