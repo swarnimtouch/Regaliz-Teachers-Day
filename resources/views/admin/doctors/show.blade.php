@@ -14,7 +14,7 @@
             <dt>City</dt>
             <dd>{{ $reel->city }}</dd>
             <dt>Type</dt>
-            <dd>{{ ucfirst($reel->content_type) }}</dd>
+            <dd>{{ ucfirst($mediaType) }}</dd>
             <dt>Status</dt>
             <dd>{{ ucfirst($reel->status) }}</dd>
             <dt>Submitted</dt>
@@ -38,12 +38,13 @@
             @endif
         </dl>
         <div class="admin-actions">
-            @if($reel->generated_video || $reel->generated_card)
-                <a class="btn-gold" href="{{ route('admin.doctors.download', $reel) }}">Download</a>
+            @if(($mediaType === 'video' && $reel->generated_video) || ($mediaType === 'audio' && $reel->audioMessage?->generated_video) || ($mediaType === 'card' && $reel->generated_card))
+                <a class="btn-gold" href="{{ route('admin.doctors.download', [$reel, 'media_type' => $mediaType]) }}">Download</a>
             @endif
-            @if(in_array($reel->content_type, ['video', 'audio']))
+            @if(in_array($mediaType, ['video', 'audio']))
                 <form method="POST" action="{{ route('admin.doctors.regenerate', $reel) }}">
                     @csrf
+                    <input type="hidden" name="media_type" value="{{ $mediaType }}">
                     <button class="btn-outline">Regenerate</button>
                 </form>
             @endif
@@ -57,27 +58,32 @@
     <section class="admin-panel">
         <h2>Media preview</h2>
         <div class="admin-media">
-            @if($reel->original_video)
+            @if($mediaType === 'video' && $reel->original_video)
                 <label>Original recording</label>
                 <video controls src="{{ route('admin.doctors.media', [$reel, 'original-video']) }}"></video>
             @endif
 
-            @if($reel->original_audio)
+            @if($mediaType === 'audio' && $reel->audioMessage?->original_audio)
                 <label>Original audio</label>
                 <audio controls src="{{ route('admin.doctors.media', [$reel, 'original-audio']) }}"></audio>
             @endif
 
-            @if($reel->generated_video)
+            @if($mediaType === 'video' && $reel->generated_video)
                 <label>Generated reel</label>
                 <video controls src="{{ route('admin.doctors.media', [$reel, 'generated-video']) }}"></video>
             @endif
 
-            @if($reel->generated_card)
+            @if($mediaType === 'audio' && $reel->audioMessage?->generated_video)
+                <label>Generated audio tribute</label>
+                <video controls src="{{ route('admin.doctors.media', [$reel, 'generated-audio-video']) }}"></video>
+            @endif
+
+            @if($mediaType === 'card' && $reel->generated_card)
                 <label>Generated card</label>
                 <img src="{{ route('admin.doctors.media', [$reel, 'card']) }}" alt="Generated card">
             @endif
 
-            @if(!$reel->original_video && !$reel->original_audio && !$reel->generated_video && !$reel->generated_card)
+            @if(($mediaType === 'video' && !$reel->original_video && !$reel->generated_video) || ($mediaType === 'audio' && !$reel->audioMessage?->original_audio && !$reel->audioMessage?->generated_video) || ($mediaType === 'card' && !$reel->generated_card))
                 <p>No media uploaded yet.</p>
             @endif
         </div>

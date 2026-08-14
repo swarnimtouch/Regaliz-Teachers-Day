@@ -9,6 +9,8 @@ use App\Http\Requests\UploadRecordingRequest;
 use App\Jobs\GenerateAudioReel;
 use App\Jobs\GenerateDoctorReel;
 use App\Models\DoctorReel;
+use App\Models\AudioMessage;
+use App\Models\GreetingCard;
 use App\Models\ReelStatusHistory;
 use App\Services\Reel\PersonalizedCard;
 use Illuminate\Http\JsonResponse;
@@ -117,6 +119,10 @@ class CampaignController extends Controller
         $doctorReel = $this->currentReel();
         $file = $request->file('audio');
         $path = $file->storeAs('audio/'.now()->format('Y/m'), $doctorReel->reference_id.'.'.$file->extension(), 'local');
+        AudioMessage::query()->updateOrCreate(
+            ['doctor_reel_id' => $doctorReel->id],
+            ['original_audio' => $path, 'generated_video' => null, 'status' => 'processing', 'error_message' => null, 'processing_started_at' => now(), 'processing_completed_at' => null]
+        );
         $doctorReel->update(['original_audio' => $path, 'content_type' => 'audio', 'status' => 'processing', 'processing_started_at' => now(), 'error_message' => null]);
         $doctorReel->statusHistories()->create(['status' => 'processing', 'message' => 'Audio message uploaded securely']);
 
@@ -153,7 +159,12 @@ class CampaignController extends Controller
         ]);
         $reel = $this->currentReel();
         $reel->update($validated + ['content_type' => 'card']);
-        $reel->update(['generated_card' => $card->generate($reel), 'status' => 'completed', 'processing_completed_at' => now()]);
+        $generatedCard = $card->generate($reel);
+        GreetingCard::query()->updateOrCreate(
+            ['doctor_reel_id' => $reel->id],
+            ['teacher_name' => $validated['teacher_name'], 'message' => $validated['card_message'], 'generated_card' => $generatedCard, 'status' => 'completed', 'processing_completed_at' => now()]
+        );
+        $reel->update(['generated_card' => $generatedCard, 'status' => 'completed', 'processing_completed_at' => now()]);
 
         return redirect()->route('campaign.result');
     }
@@ -195,18 +206,20 @@ class CampaignController extends Controller
     public function download(): BinaryFileResponse
     {
         $doctorReel = $this->currentReel();
-        abort_unless($doctorReel->status === 'completed' && $doctorReel->generated_video && Storage::disk('local')->exists($doctorReel->generated_video), 404);
+        $path = $doctorReel->content_type === 'audio' ? $doctorReel->audioMessage?->generated_video : $doctorReel->generated_video;
+        abort_unless($doctorReel->status === 'completed' && $path && Storage::disk('local')->exists($path), 404);
         $doctorReel->increment('download_count');
 
-        return response()->download(Storage::disk('local')->path($doctorReel->generated_video), $doctorReel->reference_id.'.mp4');
+        return response()->download(Storage::disk('local')->path($path), $doctorReel->reference_id.'.mp4');
     }
 
     public function previewReel(): BinaryFileResponse
     {
         $doctorReel = $this->currentReel();
-        abort_unless($doctorReel->status === 'completed' && $doctorReel->generated_video && Storage::disk('local')->exists($doctorReel->generated_video), 404);
+        $path = $doctorReel->content_type === 'audio' ? $doctorReel->audioMessage?->generated_video : $doctorReel->generated_video;
+        abort_unless($doctorReel->status === 'completed' && $path && Storage::disk('local')->exists($path), 404);
 
-        return response()->file(Storage::disk('local')->path($doctorReel->generated_video), [
+        return response()->file(Storage::disk('local')->path($path), [
             'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             'Pragma' => 'no-cache',
             'Expires' => '0',

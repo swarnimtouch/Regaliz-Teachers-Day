@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DoctorReel extends Model
@@ -38,5 +39,15 @@ class DoctorReel extends Model
     public function statusHistories(): HasMany
     {
         return $this->hasMany(ReelStatusHistory::class);
+    }
+
+    public function audioMessage(): HasOne
+    {
+        return $this->hasOne(AudioMessage::class);
+    }
+
+    public function greetingCard(): HasOne
+    {
+        return $this->hasOne(GreetingCard::class);
     }
 }

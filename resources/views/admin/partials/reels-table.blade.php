@@ -19,10 +19,10 @@
                     <td>{{ $reel->doctor_name }}</td>
                     <td>{{ $reel->speciality }}</td>
                     <td>{{ $reel->city }}</td>
-                    <td>{{ ucfirst($reel->content_type ?: 'Not selected') }}</td>
+                    <td>{{ ucfirst($filters['media_type'] ?? ($reel->content_type ?: 'Not selected')) }}</td>
                     <td><span class="status {{ $reel->status }}">{{ str_replace('_', ' ', $reel->status) }}</span></td>
                     <td>{{ $reel->created_at->format('d M Y, h:i A') }}</td>
-                    <td><a class="table-action" href="{{ route('admin.doctors.show', $reel) }}">View</a></td>
+                    <td><a class="table-action" href="{{ route('admin.doctors.show', [$reel, 'media_type' => $filters['media_type'] ?? $reel->content_type]) }}">View</a></td>
                 </tr>
             @empty
                 <tr class="admin-table-empty-row">

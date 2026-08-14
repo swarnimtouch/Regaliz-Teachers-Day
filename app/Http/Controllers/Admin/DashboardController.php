@@ -30,9 +30,11 @@ class DashboardController extends Controller
             ];
         });
 
-        $contentMix = DoctorReel::selectRaw('content_type, COUNT(*) as total')
-            ->groupBy('content_type')
-            ->pluck('total', 'content_type');
+        $contentMix = collect([
+            'video' => DoctorReel::whereNotNull('original_video')->count(),
+            'audio' => DoctorReel::whereHas('audioMessage')->count(),
+            'card' => DoctorReel::whereHas('greetingCard')->count(),
+        ]);
 
         return view('admin.dashboard', compact('stats', 'daily', 'contentMix'));
     }

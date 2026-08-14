@@ -1,6 +1,7 @@
 @extends('layouts.campaign')
 @section('title', 'Your Tribute Is Ready')
 @section('content')
+@php($generatedReel = $reel->content_type === 'audio' ? $reel->audioMessage?->generated_video : $reel->generated_video)
 <section class="center-page">
     <div class="eyebrow">✦ Your tribute</div>
     <h1>{{ $reel->status === 'completed' ? 'Ready to inspire.' : 'Still being crafted.' }}</h1>
@@ -9,7 +10,7 @@
     @if($reel->content_type === 'card' && $reel->generated_card)
         <img class="result-card" src="{{ route('campaign.preview-card') }}" alt="Personalized Teacher's Day card">
         <a class="btn-gold" href="{{ route('campaign.download-card') }}">Download card ↓</a>
-    @elseif($reel->status === 'completed' && $reel->generated_video)
+    @elseif($reel->status === 'completed' && $generatedReel)
         <video class="result-video {{ $reel->content_type === 'audio' ? 'audio-result' : '' }}" controls preload="metadata" src="{{ route('campaign.preview-reel', ['v' => $reel->processing_completed_at?->timestamp ?? now()->timestamp]) }}"></video>
         <div class="result-actions" style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
             <a class="btn-gold" href="{{ route('campaign.download') }}">Download reel ↓</a>

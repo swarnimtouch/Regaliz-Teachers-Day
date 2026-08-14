@@ -28,7 +28,18 @@ class DoctorReelsExport implements FromQuery, ShouldAutoSize, WithHeadings, With
                 });
             })
             ->when($this->filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($this->filters['content_type'] ?? null, fn (Builder $query, string $type) => $query->where('content_type', $type))
+            ->when($this->filters['media_type'] ?? null, function (Builder $query, string $type): void {
+                match ($type) {
+                    'video' => $query->whereNotNull('original_video'),
+                    'audio' => $query->whereHas('audioMessage'),
+                    'card' => $query->whereHas('greetingCard'),
+                    default => null,
+                };
+            })
+            ->when(
+                ! ($this->filters['media_type'] ?? null) && ($this->filters['content_type'] ?? null),
+                fn (Builder $query) => $query->where('content_type', $this->filters['content_type'])
+            )
             ->when($this->filters['from'] ?? null, fn (Builder $query, string $from) => $query->whereDate('created_at', '>=', $from))
             ->when($this->filters['to'] ?? null, fn (Builder $query, string $to) => $query->whereDate('created_at', '<=', $to))
             ->latest();
@@ -41,7 +52,7 @@ class DoctorReelsExport implements FromQuery, ShouldAutoSize, WithHeadings, With
 
     public function map($reel): array
     {
-        return [$reel->reference_id, $reel->doctor_name, $reel->speciality, $reel->city, $reel->content_type, $reel->status, $reel->download_count, $reel->created_at, $reel->processing_completed_at];
+        return [$reel->reference_id, $reel->doctor_name, $reel->speciality, $reel->city, $this->filters['media_type'] ?? $reel->content_type, $reel->status, $reel->download_count, $reel->created_at, $reel->processing_completed_at];
     }
 
     public function styles(Worksheet $sheet): array

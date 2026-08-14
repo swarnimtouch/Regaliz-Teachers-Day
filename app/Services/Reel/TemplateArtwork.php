@@ -8,6 +8,40 @@ use RuntimeException;
 
 class TemplateArtwork
 {
+    public function buildAudioBanner(DoctorReel $reel): string
+    {
+        if (! extension_loaded('gd')) {
+            throw new RuntimeException('PHP GD is required to create reel artwork.');
+        }
+
+        $source = public_path('images/holding-banner-audio.png');
+        if (! is_file($source)) {
+            throw new RuntimeException('The audio holding banner is missing.');
+        }
+
+        $directory = 'reel-artwork/'.now()->format('Y/m');
+        Storage::disk('local')->makeDirectory($directory);
+        $path = $directory.'/'.$reel->reference_id.'-audio-banner.png';
+        // Some exported artwork contains a harmless malformed ICC profile.
+        // GD emits a warning for it, which Laravel converts into an exception.
+        $image = @imagecreatefrompng($source);
+        if ($image === false) {
+            throw new RuntimeException('The audio holding banner could not be opened.');
+        }
+        imagealphablending($image, true);
+
+        // Clear the baked-in "From" placeholder and redraw it slightly higher.
+        imagecopy($image, $image, 135, 1738, 135, 1628, 700, 72);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        imagettftext($image, 24, 0, 142, 1695, $white, $this->boldFont(), 'From, '.$reel->doctor_name);
+
+        imagepng($image, Storage::disk('local')->path($path));
+        imagedestroy($image);
+        $reel->update(['details_image' => $path]);
+
+        return $path;
+    }
+
     public function buildAnimationCaption(DoctorReel $reel): string
     {
         if (! extension_loaded('gd')) {
@@ -147,6 +181,16 @@ class TemplateArtwork
         $font = PHP_OS_FAMILY === 'Windows' ? 'C:\\Windows\\Fonts\\arial.ttf' : '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
         if (! is_file($font)) {
             throw new RuntimeException('A TrueType font is required to create reel artwork.');
+        }
+
+        return $font;
+    }
+
+    private function boldFont(): string
+    {
+        $font = PHP_OS_FAMILY === 'Windows' ? 'C:\\Windows\\Fonts\\arialbd.ttf' : '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
+        if (! is_file($font)) {
+            return $this->font();
         }
 
         return $font;

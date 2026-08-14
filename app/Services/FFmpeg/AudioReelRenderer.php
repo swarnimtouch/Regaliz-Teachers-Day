@@ -18,20 +18,19 @@ class AudioReelRenderer
             throw new RuntimeException('The source audio is missing.');
         }
 
-        $template = public_path('videos/teachers-day-animation.mp4');
-        if (! is_file($template)) {
-            throw new RuntimeException('The Teacher\'s Day animation template is missing.');
-        }
-
         $output = 'reels/'.now()->format('Y/m').'/'.$reel->reference_id.'-audio.mp4';
         Storage::disk('local')->makeDirectory(dirname($output));
-        $caption = Storage::disk('local')->path($this->artwork->buildAnimationCaption($reel));
+        $banner = Storage::disk('local')->path($this->artwork->buildAudioBanner($reel));
+        $waveVideo = public_path('videos/audio-wave-green-screen.mp4');
+        if (! is_file($waveVideo)) {
+            throw new RuntimeException('The audio wave animation is missing.');
+        }
         $duration = $this->mediaDuration(Storage::disk('local')->path($reel->original_audio));
-        $filter = "[1:v]split=3[introbase][middlebase][outrobase];[introbase]trim=start=0:end=8.7,setpts=PTS-STARTPTS[intro];[middlebase]trim=start=12:end=12.04,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration={$duration},trim=duration={$duration}[middle];[outrobase]trim=start=14.4,setpts=PTS-STARTPTS[outro];[0:a]atrim=duration={$duration},asetpts=PTS-STARTPTS[messageaudio];[messageaudio]asplit=2[voice][waveaudio];[waveaudio]showwaves=s=619x180:mode=cline:rate=30:colors=0xffff00,format=rgba[wave];[middle][2:v]overlay=0:0,trim=duration={$duration}[cleanmiddle];[cleanmiddle][wave]overlay=219:880:shortest=1,tpad=stop_mode=clone:stop_duration=1,trim=duration={$duration}[message];[intro][message][outro]concat=n=3:v=1:a=0,format=yuv420p[v];[1:a]asplit=2[introaudio][outroaudio];[introaudio]atrim=start=0:end=8.7,asetpts=PTS-STARTPTS[ia];[voice]asetpts=PTS-STARTPTS[ma];[outroaudio]atrim=start=14.4,asetpts=PTS-STARTPTS[oa];[ia][ma][oa]concat=n=3:v=0:a=1[a]";
+        $filter = "[0:a]atrim=duration={$duration},asetpts=PTS-STARTPTS[voice];[1:v]scale=1080:1920,setsar=1,trim=duration={$duration},setpts=PTS-STARTPTS[board];[2:v]crop=1920:420:0:300,scale=780:110,format=rgba,colorkey=0x2fa83d:0.30:0.10,trim=duration={$duration},setpts=PTS-STARTPTS[wave];[board][wave]overlay=150:1715:shortest=1,format=yuv420p[v]";
         $result = Process::timeout(300)->run([
             config('services.ffmpeg.binary', 'ffmpeg'), '-y', '-i', Storage::disk('local')->path($reel->original_audio),
-            '-i', $template, '-loop', '1', '-i', $caption, '-filter_complex', $filter,
-            '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '24',
+            '-loop', '1', '-framerate', '30', '-i', $banner, '-stream_loop', '-1', '-i', $waveVideo, '-filter_complex', $filter,
+            '-map', '[v]', '-map', '[voice]', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '24',
             '-r', '30', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart',
             Storage::disk('local')->path($output),
         ]);

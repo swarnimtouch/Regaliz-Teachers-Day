@@ -29,7 +29,13 @@ class GenerateAudioReel implements ShouldQueue
             'attempt' => $this->attempts(),
         ]);
         $output = $renderer->render($this->doctorReel);
-        $this->doctorReel->update(['generated_video' => $output, 'status' => 'completed', 'processing_completed_at' => now(), 'error_message' => null]);
+        $this->doctorReel->audioMessage()->update([
+            'generated_video' => $output,
+            'status' => 'completed',
+            'processing_completed_at' => now(),
+            'error_message' => null,
+        ]);
+        $this->doctorReel->update(['status' => 'completed', 'processing_completed_at' => now(), 'error_message' => null]);
         $this->doctorReel->statusHistories()->create(['status' => 'completed', 'message' => 'Audio tribute video generated']);
         Log::info('Audio reel job completed', [
             'reference_id' => $this->doctorReel->reference_id,
@@ -44,5 +50,6 @@ class GenerateAudioReel implements ShouldQueue
             'exception' => $exception,
         ]);
         $this->doctorReel->update(['status' => 'failed', 'processing_failed_at' => now(), 'error_message' => $exception?->getMessage()]);
+        $this->doctorReel->audioMessage()->update(['status' => 'failed', 'error_message' => $exception?->getMessage()]);
     }
 }

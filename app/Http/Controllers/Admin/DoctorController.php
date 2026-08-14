@@ -39,22 +39,31 @@ class DoctorController extends Controller
         return $this->typeIndex($request, 'card', 'Greeting Cards');
     }
 
-    public function show(DoctorReel $doctorReel): View
+    public function show(Request $request, DoctorReel $doctorReel): View
     {
-        return view('admin.doctors.show', ['reel' => $doctorReel]);
+        $mediaType = in_array($request->query('media_type'), ['video', 'audio', 'card'], true)
+            ? $request->query('media_type')
+            : $doctorReel->content_type;
+
+        return view('admin.doctors.show', ['reel' => $doctorReel, 'mediaType' => $mediaType]);
     }
 
-    public function regenerate(DoctorReel $doctorReel): RedirectResponse
+    public function regenerate(Request $request, DoctorReel $doctorReel): RedirectResponse
     {
+        $mediaType = $request->input('media_type', $doctorReel->content_type);
         $doctorReel->update(['status' => 'processing', 'error_message' => null, 'processing_started_at' => now()]);
-        $doctorReel->content_type === 'audio' ? GenerateAudioReel::dispatch($doctorReel) : GenerateDoctorReel::dispatch($doctorReel);
+        $mediaType === 'audio' ? GenerateAudioReel::dispatch($doctorReel) : GenerateDoctorReel::dispatch($doctorReel);
 
         return back()->with('success', 'Regeneration completed or queued successfully.');
     }
 
-    public function download(DoctorReel $doctorReel): BinaryFileResponse
+    public function download(Request $request, DoctorReel $doctorReel): BinaryFileResponse
     {
-        $path = $doctorReel->content_type === 'card' ? $doctorReel->generated_card : $doctorReel->generated_video;
+        $path = match ($request->query('media_type', $doctorReel->content_type)) {
+            'audio' => $doctorReel->audioMessage?->generated_video,
+            'card' => $doctorReel->generated_card,
+            default => $doctorReel->generated_video,
+        };
         abort_unless($path && Storage::disk('local')->exists($path), 404);
 
         return response()->download(Storage::disk('local')->path($path));
@@ -64,8 +73,9 @@ class DoctorController extends Controller
     {
         $path = match ($kind) {
             'original-video' => $doctorReel->original_video,
-            'original-audio' => $doctorReel->original_audio,
+            'original-audio' => $doctorReel->audioMessage?->original_audio,
             'generated-video' => $doctorReel->generated_video,
+            'generated-audio-video' => $doctorReel->audioMessage?->generated_video,
             'card' => $doctorReel->generated_card,
             default => null,
         };
@@ -76,7 +86,7 @@ class DoctorController extends Controller
 
     public function destroy(DoctorReel $doctorReel): RedirectResponse
     {
-        foreach ([$doctorReel->original_video, $doctorReel->original_audio, $doctorReel->generated_video, $doctorReel->generated_card, $doctorReel->details_image] as $path) {
+        foreach ([$doctorReel->original_video, $doctorReel->audioMessage?->original_audio, $doctorReel->generated_video, $doctorReel->audioMessage?->generated_video, $doctorReel->generated_card, $doctorReel->details_image] as $path) {
             if ($path) {
                 Storage::disk('local')->delete($path);
             }
@@ -88,13 +98,14 @@ class DoctorController extends Controller
 
     public function export(Request $request): BinaryFileResponse
     {
-        return Excel::download(new DoctorReelsExport($request->only(['search', 'status', 'content_type', 'from', 'to'])), 'doctor-reels-'.now()->format('Y-m-d-His').'.xlsx');
+        return Excel::download(new DoctorReelsExport($request->only(['search', 'status', 'content_type', 'media_type', 'from', 'to'])), 'doctor-reels-'.now()->format('Y-m-d-His').'.xlsx');
     }
 
     private function typeIndex(Request $request, string $type, string $title): View
     {
         $filters = $request->only(['search', 'status', 'from', 'to']);
         $filters['content_type'] = $type;
+        $filters['media_type'] = $type;
         $reels = (new DoctorReelsExport($filters))->query()->paginate(20)->withQueryString();
 
         return view('admin.doctors.index', ['reels' => $reels, 'filters' => $filters, 'moduleTitle' => $title]);
