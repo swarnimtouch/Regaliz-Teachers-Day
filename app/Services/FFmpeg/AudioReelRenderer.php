@@ -26,7 +26,7 @@ class AudioReelRenderer
             throw new RuntimeException('The audio wave animation is missing.');
         }
         $duration = $this->mediaDuration(Storage::disk('local')->path($reel->original_audio));
-        $filter = "[0:a]atrim=duration={$duration},asetpts=PTS-STARTPTS[voice];[1:v]scale=1080:1920,setsar=1,trim=duration={$duration},setpts=PTS-STARTPTS[board];[2:v]crop=1920:420:0:300,scale=780:110,format=rgba,colorkey=0x2fa83d:0.30:0.10,trim=duration={$duration},setpts=PTS-STARTPTS[wave];[board][wave]overlay=150:1715:shortest=1,format=yuv420p[v]";
+        $filter = "[0:a]atrim=duration={$duration},asetpts=PTS-STARTPTS[voice];[1:v]scale=1080:1920,setsar=1,trim=duration={$duration},setpts=PTS-STARTPTS[board];[2:v]crop=1920:420:0:300,scale=780:110,format=rgba,colorkey=0x2fa83d:0.30:0.10,trim=duration={$duration},setpts=PTS-STARTPTS[wave];[board][wave]overlay=150:1645:shortest=1,format=yuv420p[v]";
         $result = Process::timeout(300)->run([
             config('services.ffmpeg.binary', 'ffmpeg'), '-y', '-i', Storage::disk('local')->path($reel->original_audio),
             '-loop', '1', '-framerate', '30', '-i', $banner, '-stream_loop', '-1', '-i', $waveVideo, '-filter_complex', $filter,

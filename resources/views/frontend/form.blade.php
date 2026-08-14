@@ -1,6 +1,6 @@
 @extends('layouts.campaign')
 
-@section('title', 'Create Your Tribute')
+@section('title', 'Create Your Message')
 
 @section('content')
 <section class="form-page section-wrap">
@@ -37,7 +37,7 @@
 
         <label class="consent">
             <input type="checkbox" name="consent" value="1" {{ old('consent') ? 'checked' : '' }}>
-            <span>I consent to recording and processing my video for this Teacher's Day tribute.</span>
+            <span>I consent to recording and processing my video for this Teacher's Day message.</span>
         </label>
         <small class="field-error consent-error" data-error-for="consent">@error('consent'){{ $message }}@enderror</small>
 

@@ -74,7 +74,7 @@
             @endif
 
             @if($mediaType === 'audio' && $reel->audioMessage?->generated_video)
-                <label>Generated audio tribute</label>
+                <label>Generated audio message</label>
                 <video controls src="{{ route('admin.doctors.media', [$reel, 'generated-audio-video']) }}"></video>
             @endif
 

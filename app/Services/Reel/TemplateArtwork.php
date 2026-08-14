@@ -33,7 +33,7 @@ class TemplateArtwork
         // Clear the baked-in "From" placeholder and redraw it slightly higher.
         imagecopy($image, $image, 135, 1738, 135, 1628, 700, 72);
         $white = imagecolorallocate($image, 255, 255, 255);
-        imagettftext($image, 24, 0, 142, 1695, $white, $this->boldFont(), 'From, '.$reel->doctor_name);
+        imagettftext($image, 24, 0, 142, 1810, $white, $this->boldFont(), 'From, '.$reel->doctor_name);
 
         imagepng($image, Storage::disk('local')->path($path));
         imagedestroy($image);

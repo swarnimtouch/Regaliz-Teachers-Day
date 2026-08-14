@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
             $logo = $settings->get('campaign_logo');
             $view->with([
                 'campaignLogoUrl' => $logo ? asset($logo) : asset('images/regaliz-logo.png'),
-                'campaignTitle' => $settings->get('campaign_title', "Teacher's Day Tribute"),
+                'campaignTitle' => $settings->get('campaign_title', "Teacher's Day Message"),
                 'campaignSubtitle' => $settings->get('campaign_subtitle', 'A heartfelt mentor message'),
             ]);
         });

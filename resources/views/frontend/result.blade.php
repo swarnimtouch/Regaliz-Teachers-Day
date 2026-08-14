@@ -1,12 +1,10 @@
 @extends('layouts.campaign')
-@section('title', 'Your Tribute Is Ready')
+@section('title', 'Your Message Is Ready')
 @section('content')
 @php($generatedReel = $reel->content_type === 'audio' ? $reel->audioMessage?->generated_video : $reel->generated_video)
 <section class="center-page">
-    <div class="eyebrow">✦ Your tribute</div>
+    <div class="eyebrow">✦ Your message</div>
     <h1>{{ $reel->status === 'completed' ? 'Ready to inspire.' : 'Still being crafted.' }}</h1>
-    <p>Reference {{ $reel->reference_id }}</p>
-
     @if($reel->content_type === 'card' && $reel->generated_card)
         <img class="result-card" src="{{ route('campaign.preview-card') }}" alt="Personalized Teacher's Day card">
         <a class="btn-gold" href="{{ route('campaign.download-card') }}">Download card ↓</a>

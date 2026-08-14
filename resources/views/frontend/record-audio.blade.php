@@ -14,11 +14,11 @@
         <img src="{{ asset('images/holding-banner-audio.png') }}" alt="Teacher's Day audio holding banner">
         <canvas id="audioWave" width="720" height="110"></canvas>
         <div class="audio-status"><span id="audioDot"></span><b id="audioStatus">Ready to record</b><time id="audioTimer">00:00</time></div>
-        <form id="audioForm" method="POST" action="{{ route('campaign.upload-audio') }}" enctype="multipart/form-data">@csrf<input id="audioInput" type="file" name="audio" hidden><div class="recorder-actions"><button id="audioStart" type="button" class="record-btn"><span></span> Start audio</button><button id="audioStop" type="button" class="btn-outline" hidden>Stop recording</button><button id="audioRetake" type="button" class="btn-outline" hidden>Retake</button><button id="audioContinue" type="submit" class="btn-gold" hidden>Generate tribute →</button></div></form>
+        <form id="audioForm" method="POST" action="{{ route('campaign.upload-audio') }}" enctype="multipart/form-data">@csrf<input id="audioInput" type="file" name="audio" hidden><div class="recorder-actions"><button id="audioStart" type="button" class="record-btn"><span></span> Start audio</button><button id="audioStop" type="button" class="btn-outline" hidden>Stop recording</button><button id="audioRetake" type="button" class="btn-outline" hidden>Retake</button><button id="audioContinue" type="submit" class="btn-gold" hidden>Generate message →</button></div></form>
         <audio id="audioPreview" controls hidden></audio><p id="audioError" class="record-error"></p><p class="recording-limit recording-limit-light">Maximum recording time is 20 seconds. Recording will stop automatically.</p>
     </div>
 </section>
-<div id="processingOverlay" class="submit-processing" hidden><div class="processing-orb"><span>♪</span></div><h2>Creating your audio tribute...</h2><p>The video will match your audio duration.</p><div class="progress-track"><i></i></div></div>
+<div id="processingOverlay" class="submit-processing" hidden><div class="processing-orb"><span>♪</span></div><h2>Creating your audio message...</h2><p>The video will match your audio duration.</p><div class="progress-track"><i></i></div></div>
 @endsection
 
 @push('scripts')

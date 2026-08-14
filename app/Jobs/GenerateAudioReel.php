@@ -36,7 +36,7 @@ class GenerateAudioReel implements ShouldQueue
             'error_message' => null,
         ]);
         $this->doctorReel->update(['status' => 'completed', 'processing_completed_at' => now(), 'error_message' => null]);
-        $this->doctorReel->statusHistories()->create(['status' => 'completed', 'message' => 'Audio tribute video generated']);
+        $this->doctorReel->statusHistories()->create(['status' => 'completed', 'message' => 'Audio message video generated']);
         Log::info('Audio reel job completed', [
             'reference_id' => $this->doctorReel->reference_id,
             'output_path' => $output,

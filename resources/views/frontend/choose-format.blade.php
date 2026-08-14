@@ -4,7 +4,7 @@
 
 @section('content')
 <section class="format-page section-wrap">
-    <div class="eyebrow"><span>02</span> Choose your tribute</div>
+    <div class="eyebrow"><span>02</span> Choose your message</div>
     <h1>How would you like to say <em>thank you?</em></h1>
     <p>Hello <strong>{{ $reel->doctor_name }}</strong>, select one format to continue.</p>
     <div class="format-grid">
