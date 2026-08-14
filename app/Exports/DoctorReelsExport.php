@@ -47,18 +47,18 @@ class DoctorReelsExport implements FromQuery, ShouldAutoSize, WithHeadings, With
 
     public function headings(): array
     {
-        return ['Reference ID', 'Name', 'Speciality', 'City', 'Type', 'Status', 'Downloads', 'Submitted At', 'Completed At'];
+        return ['Reference ID', 'Name', 'City', 'Type', 'Status', 'Downloads', 'Submitted At', 'Completed At'];
     }
 
     public function map($reel): array
     {
-        return [$reel->reference_id, $reel->doctor_name, $reel->speciality, $reel->city, $this->filters['media_type'] ?? $reel->content_type, $reel->status, $reel->download_count, $reel->created_at, $reel->processing_completed_at];
+        return [$reel->reference_id, $reel->doctor_name, $reel->city, $this->filters['media_type'] ?? $reel->content_type, $reel->status, $reel->download_count, $reel->created_at, $reel->processing_completed_at];
     }
 
     public function styles(Worksheet $sheet): array
     {
-        $sheet->getStyle('A1:I1')->getFill()->setFillType('solid')->getStartColor()->setARGB('FF245337');
-        $sheet->getStyle('A1:I1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A1:H1')->getFill()->setFillType('solid')->getStartColor()->setARGB('FF245337');
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
         $sheet->freezePane('A2');
         $sheet->setAutoFilter($sheet->calculateWorksheetDimension());
 

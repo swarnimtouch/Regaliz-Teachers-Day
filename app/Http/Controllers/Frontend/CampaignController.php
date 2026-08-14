@@ -37,6 +37,7 @@ class CampaignController extends Controller
         ]);
 
         $reel = DoctorReel::query()->create($request->validated() + [
+            'speciality' => 'Not specified',
             'reference_id' => 'TDR-'.now()->format('ymd').'-'.Str::upper(Str::random(6)),
             'status' => 'awaiting_recording',
         ]);
@@ -54,6 +55,13 @@ class CampaignController extends Controller
     public function chooseFormat(): View
     {
         return view('frontend.choose-format', ['reel' => $this->currentReel()]);
+    }
+
+    public function logoutCampaign(Request $request): RedirectResponse
+    {
+        $request->session()->forget('campaign_reel_id');
+
+        return redirect()->route('campaign.landing');
     }
 
     public function selectFormat(Request $request): RedirectResponse
@@ -156,10 +164,15 @@ class CampaignController extends Controller
         $validated = $request->validate([
             'teacher_name' => ['required', 'string', 'max:80'],
             'card_message' => ['required', 'string', 'max:240'],
+            'card_template' => ['required', 'in:chalkboard,golden,notebook'],
         ]);
         $reel = $this->currentReel();
-        $reel->update($validated + ['content_type' => 'card']);
-        $generatedCard = $card->generate($reel);
+        $reel->update([
+            'teacher_name' => $validated['teacher_name'],
+            'card_message' => $validated['card_message'],
+            'content_type' => 'card',
+        ]);
+        $generatedCard = $card->generate($reel, $validated['card_template']);
         GreetingCard::query()->updateOrCreate(
             ['doctor_reel_id' => $reel->id],
             ['teacher_name' => $validated['teacher_name'], 'message' => $validated['card_message'], 'generated_card' => $generatedCard, 'status' => 'completed', 'processing_completed_at' => now()]

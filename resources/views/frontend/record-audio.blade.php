@@ -11,7 +11,7 @@
         <div class="prompt-box"><b>You can begin with:</b><p>“Dear teacher, thank you for guiding me and inspiring my journey...”</p></div>
     </div>
     <div class="audio-recorder">
-        <img src="{{ asset('images/holding-banner-audio.png') }}" alt="Teacher's Day audio holding banner">
+        <img src="{{ asset('images/holding-banner-audio.png') }}?v={{ filemtime(public_path('images/holding-banner-audio.png')) }}" alt="Teacher's Day audio holding banner">
         <canvas id="audioWave" width="720" height="110"></canvas>
         <div class="audio-status"><span id="audioDot"></span><b id="audioStatus">Ready to record</b><time id="audioTimer">00:00</time></div>
         <form id="audioForm" method="POST" action="{{ route('campaign.upload-audio') }}" enctype="multipart/form-data">@csrf<input id="audioInput" type="file" name="audio" hidden><div class="recorder-actions"><button id="audioStart" type="button" class="record-btn"><span></span> Start audio</button><button id="audioStop" type="button" class="btn-outline" hidden>Stop recording</button><button id="audioRetake" type="button" class="btn-outline" hidden>Retake</button><button id="audioContinue" type="submit" class="btn-gold" hidden>Generate message →</button></div></form>

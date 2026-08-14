@@ -14,7 +14,7 @@
     </div>
 </section>
 <section class="how section-wrap"><div class="section-heading"><span>Simple & meaningful</span><h2>Your message in three steps</h2></div><div class="steps">
-    <article><b>01</b><div class="step-icon">✍</div><h3>Tell us about you</h3><p>Add your name, speciality and city so your reel feels personal.</p></article>
+    <article><b>01</b><div class="step-icon">✍</div><h3>Tell us about you</h3><p>Add your name and city so your message feels personal.</p></article>
     <article><b>02</b><div class="step-icon">◉</div><h3>Record your message</h3><p>Speak from the heart for 5–20 seconds using your front camera.</p></article>
     <article><b>03</b><div class="step-icon">✦</div><h3>Share your gratitude</h3><p>We craft a vertical Teacher's Day reel, ready to download and share.</p></article>
 </div></section>

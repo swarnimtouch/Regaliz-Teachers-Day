@@ -9,8 +9,6 @@
         <dl class="detail-list">
             <dt>Name</dt>
             <dd>{{ $reel->doctor_name }}</dd>
-            <dt>Speciality</dt>
-            <dd>{{ $reel->speciality }}</dd>
             <dt>City</dt>
             <dd>{{ $reel->city }}</dd>
             <dt>Type</dt>

@@ -13,11 +13,16 @@
 <body>
     <div class="ambient ambient-one"></div>
     <div class="ambient ambient-two"></div>
+    <div class="teacher-layout-quote teacher-layout-quote-left" aria-hidden="true"><span>✦</span> Great teachers awaken possibility.</div>
+    <div class="teacher-layout-quote" aria-hidden="true"><span>✦</span> Every lesson leaves a little light behind.</div>
     <header class="site-header">
         <a class="brand" href="{{ route('campaign.landing') }}">
             <img class="company-logo" src="{{ $campaignLogoUrl }}" alt="Campaign logo">
             <span><b>{{ $campaignTitle }}</b><small>{{ $campaignSubtitle }}</small></span>
         </a>
+        @if(session('campaign_reel_id'))
+            <form method="POST" action="{{ route('campaign.logout') }}">@csrf<button class="header-logout" type="submit">Logout</button></form>
+        @endif
     </header>
     <main>@yield('content')</main>
     <footer><span>Made with gratitude for the teachers who shape tomorrow.</span><span>© {{ date('Y') }} Teacher's Day</span></footer>

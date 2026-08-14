@@ -22,26 +22,19 @@
             <small class="field-error" data-error-for="doctor_name">@error('doctor_name'){{ $message }}@enderror</small>
         </label>
 
-        <div class="form-grid">
-            <label>
-                Speciality <span>*</span>
-                <input name="speciality" value="{{ old('speciality') }}" placeholder="Cardiologist" maxlength="100">
-                <small class="field-error" data-error-for="speciality">@error('speciality'){{ $message }}@enderror</small>
-            </label>
-            <label>
-                City <span>*</span>
-                <input name="city" value="{{ old('city') }}" placeholder="Mumbai" maxlength="100">
-                <small class="field-error" data-error-for="city">@error('city'){{ $message }}@enderror</small>
-            </label>
-        </div>
+        <label>
+            City <span>*</span>
+            <input name="city" value="{{ old('city') }}" placeholder="Enter your city" maxlength="100">
+            <small class="field-error" data-error-for="city">@error('city'){{ $message }}@enderror</small>
+        </label>
 
         <label class="consent">
             <input type="checkbox" name="consent" value="1" {{ old('consent') ? 'checked' : '' }}>
-            <span>I consent to recording and processing my video for this Teacher's Day message.</span>
+            <span>I agree that my recording may be securely processed to create my Teacher's Day message.</span>
         </label>
         <small class="field-error consent-error" data-error-for="consent">@error('consent'){{ $message }}@enderror</small>
 
-        <button id="registrationSubmit" class="btn-gold wide" type="submit">Continue to recording <span>→</span></button>
+        <button id="registrationSubmit" class="btn-gold wide" type="submit">Next <span>→</span></button>
         <p class="secure-note">Your recording is stored securely.</p>
     </form>
 </section>
@@ -53,7 +46,6 @@ const registrationForm = document.querySelector('#registrationForm');
 const registrationSubmit = document.querySelector('#registrationSubmit');
 const rules = {
     doctor_name: value => value.length >= 2 ? '' : 'Please enter your name.',
-    speciality: value => value.length >= 2 ? '' : 'Please enter the speciality.',
     city: value => value.length >= 2 ? '' : 'Please enter the city.',
     consent: value => value ? '' : 'Please accept the consent checkbox to continue.',
 };
@@ -94,7 +86,7 @@ registrationForm.addEventListener('submit', event => {
     }
 
     registrationSubmit.disabled = true;
-    registrationSubmit.textContent = 'Opening camera...';
+    registrationSubmit.textContent = 'Please wait...';
 });
 </script>
 @endpush

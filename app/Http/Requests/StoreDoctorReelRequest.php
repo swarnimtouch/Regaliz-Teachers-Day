@@ -15,7 +15,6 @@ class StoreDoctorReelRequest extends FormRequest
     {
         return [
             'doctor_name' => ['required', 'string', 'max:100'],
-            'speciality' => ['required', 'string', 'max:100'],
             'city' => ['required', 'string', 'max:100'],
             'consent' => ['accepted'],
         ];

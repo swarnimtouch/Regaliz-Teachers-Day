@@ -66,8 +66,7 @@ class TemplateArtwork
         $font = $this->font();
         $nameSize = mb_strlen($reel->doctor_name) > 24 ? 40 : 48;
         $this->centerText($image, $reel->doctor_name, $nameSize, 1435, $white, $font);
-        $this->centerText($image, $reel->speciality, 31, 1500, $white, $font);
-        $this->centerText($image, $reel->city, 31, 1550, $white, $font);
+        $this->centerText($image, $reel->city, 31, 1525, $white, $font);
         imagepng($image, Storage::disk('local')->path($path));
         imagedestroy($image);
 
@@ -151,7 +150,7 @@ class TemplateArtwork
         $font = $this->font();
         $nameSize = mb_strlen($reel->doctor_name) > 24 ? 43 : 52;
         $this->centerText($image, $reel->doctor_name, $nameSize, 1435, $purple, $font);
-        $details = implode('  •  ', array_filter([$reel->speciality, $reel->city]));
+        $details = $reel->city;
         $this->centerText($image, $details, 30, 1515, $muted, $font);
         $this->centerText($image, 'Thank you for inspiring every generation', 29, 1715, $purple, $font);
         imagepng($image, $path);

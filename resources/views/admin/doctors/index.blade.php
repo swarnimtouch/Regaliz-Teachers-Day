@@ -6,7 +6,7 @@
 @section('content')
     <section class="admin-panel">
         <form class="admin-filters" method="GET" data-live-admin-filters onsubmit="return false">
-            <input name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Doctor name, speciality or city" autocomplete="off">
+            <input name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Name, reference ID or city" autocomplete="off">
 
             @if(!isset($filters['content_type']))
                 <select name="content_type">

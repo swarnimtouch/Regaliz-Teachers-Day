@@ -4,7 +4,6 @@
             <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Speciality</th>
                 <th>City</th>
                 <th>Type</th>
                 <th>Status</th>
@@ -17,7 +16,6 @@
                 <tr>
                     <td><b>{{ method_exists($items, 'firstItem') ? $items->firstItem() + $loop->index : $loop->iteration }}</b></td>
                     <td>{{ $reel->doctor_name }}</td>
-                    <td>{{ $reel->speciality }}</td>
                     <td>{{ $reel->city }}</td>
                     <td>{{ ucfirst($filters['media_type'] ?? ($reel->content_type ?: 'Not selected')) }}</td>
                     <td><span class="status {{ $reel->status }}">{{ str_replace('_', ' ', $reel->status) }}</span></td>
@@ -26,7 +24,7 @@
                 </tr>
             @empty
                 <tr class="admin-table-empty-row">
-                    <td class="empty" colspan="8">No records found</td>
+                    <td class="empty" colspan="7">No records found</td>
                 </tr>
             @endforelse
         </tbody>
