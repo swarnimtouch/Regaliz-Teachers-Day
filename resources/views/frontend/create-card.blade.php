@@ -4,6 +4,11 @@
 
 @section('content')
     @php($selectedTemplate = old('card_template', session('card_template', 'chalkboard')))
+    @php($templateImages = [
+        'chalkboard' => asset('images/blackboard-card-template-v3.png'),
+        'golden' => asset('images/golden-card-template-v3.png'),
+        'notebook' => asset('images/notebook-card-template-v2.png'),
+    ])
     <section class="card-maker section-wrap">
         <div class="card-form-copy">
             <div class="eyebrow"><span>03</span> Personalized greeting</div>
@@ -14,16 +19,16 @@
                 <input id="renderedCard" type="hidden" name="rendered_card">
                 <fieldset class="card-template-picker">
                     <legend>Choose a card template <span>*</span></legend>
-                    <label><input type="radio" name="card_template" value="chalkboard" @checked($selectedTemplate === 'chalkboard')><span class="template-thumb template-chalkboard"><b>BLACKBOARD</b><small>Classroom tribute</small></span></label>
-                    <label><input type="radio" name="card_template" value="golden" @checked($selectedTemplate === 'golden')><span class="template-thumb template-golden"><b>CERTIFICATE</b><small>Formal appreciation</small></span></label>
-                    <label><input type="radio" name="card_template" value="notebook" @checked($selectedTemplate === 'notebook')><span class="template-thumb template-notebook"><b>ELEGANT</b><small>Classic appreciation</small></span></label>
+                    <label><input type="radio" name="card_template" value="chalkboard" @checked($selectedTemplate === 'chalkboard')><span class="template-thumb template-chalkboard" style="background-image:url('{{ $templateImages['chalkboard'] }}')"><b>BLACKBOARD</b><small>Classroom tribute</small></span></label>
+                    <label><input type="radio" name="card_template" value="golden" @checked($selectedTemplate === 'golden')><span class="template-thumb template-golden" style="background-image:url('{{ $templateImages['golden'] }}')"><b>CERTIFICATE</b><small>Formal appreciation</small></span></label>
+                    <label><input type="radio" name="card_template" value="notebook" @checked($selectedTemplate === 'notebook')><span class="template-thumb template-notebook" style="background-image:url('{{ $templateImages['notebook'] }}')"><b>ELEGANT</b><small>Classic appreciation</small></span></label>
                 </fieldset>
                 <label>Teacher or mentor name <span>*</span><input id="teacherName" name="teacher_name" maxlength="80" value="" placeholder="Prof. Mehta" autocomplete="off" required></label>
                 <label>Your message <span>*</span><textarea id="cardMessage" name="card_message" maxlength="240" rows="5" placeholder="Thank you for believing in me and guiding my journey..." autocomplete="off" required></textarea><small><output id="messageCount">0</output>/240 characters</small></label>
                 <button class="btn-gold wide">Create my card →</button>
             </form>
         </div>
-        <div id="cardPreview" class="unique-card-preview preview-{{ $selectedTemplate }}">
+        <div id="cardPreview" class="unique-card-preview preview-{{ $selectedTemplate }}" style="background-image:url('{{ $templateImages[$selectedTemplate] }}')">
             <span id="cardKicker" class="card-kicker">HAPPY TEACHER'S DAY</span>
             <div id="cardSeal" class="guru-seal">GURU</div>
             <h2 id="previewTeacher">Dear Teacher,</h2>
@@ -47,6 +52,7 @@
         const kicker = document.querySelector('#cardKicker');
         const seal = document.querySelector('#cardSeal');
         const footer = document.querySelector('#cardFooter');
+        const templateImages = @json($templateImages);
         const form = document.querySelector('#cardForm');
         const renderedCard = document.querySelector('#renderedCard');
         const submitButton = form.querySelector('button[type="submit"], button:not([type])');
@@ -74,6 +80,7 @@
         resizePreviewMessage();
         document.querySelectorAll('[name="card_template"]').forEach(option => option.addEventListener('change', () => {
             preview.className = `unique-card-preview preview-${option.value}`;
+            preview.style.backgroundImage = `url("${templateImages[option.value]}")`;
             const copy = {
                 chalkboard: ["HAPPY TEACHER'S DAY", 'GURU', 'THE BEST TEACHERS HELP US REACH THE TOP'],
                 golden: ['CERTIFICATE OF APPRECIATION', '★', 'PRESENTED WITH RESPECT AND GRATITUDE'],
