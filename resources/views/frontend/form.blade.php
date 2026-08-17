@@ -30,7 +30,7 @@
 
         <label class="consent">
             <input type="checkbox" name="consent" value="1" {{ old('consent') ? 'checked' : '' }}>
-            <span>I agree that my recording may be securely processed to create my Teacher's Day message.</span>
+            <span>I consent to the use of my information on this platform.</span>
         </label>
         <small class="field-error consent-error" data-error-for="consent">@error('consent'){{ $message }}@enderror</small>
 

@@ -156,6 +156,8 @@ class CampaignController extends Controller
 
     public function createCard(): View
     {
+        session()->forget('card_template');
+
         return view('frontend.create-card', ['reel' => $this->currentReel()]);
     }
 
@@ -165,6 +167,7 @@ class CampaignController extends Controller
             'teacher_name' => ['required', 'string', 'max:80'],
             'card_message' => ['required', 'string', 'max:240'],
             'card_template' => ['required', 'in:chalkboard,golden,notebook'],
+            'rendered_card' => ['required', 'string', 'max:12000000'],
         ]);
         $reel = $this->currentReel();
         $reel->update([
@@ -172,7 +175,7 @@ class CampaignController extends Controller
             'card_message' => $validated['card_message'],
             'content_type' => 'card',
         ]);
-        $generatedCard = $card->generate($reel, $validated['card_template']);
+        $generatedCard = $card->saveRendered($reel, $validated['rendered_card']);
         GreetingCard::query()->updateOrCreate(
             ['doctor_reel_id' => $reel->id],
             ['teacher_name' => $validated['teacher_name'], 'message' => $validated['card_message'], 'generated_card' => $generatedCard, 'status' => 'completed', 'processing_completed_at' => now()]

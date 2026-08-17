@@ -1,5 +1,8 @@
 import './bootstrap';
 import DataTable from 'datatables.net-dt';
+import { toPng } from 'html-to-image';
+
+window.cardToPng = toPng;
 
 document.addEventListener('DOMContentLoaded', () => {
     const initialiseTables = root => root.querySelectorAll('.admin-datatable').forEach(table => {
