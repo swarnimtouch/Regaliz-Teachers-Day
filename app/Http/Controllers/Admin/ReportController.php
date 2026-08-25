@@ -16,15 +16,15 @@ class ReportController extends Controller
     {
         $from = $request->date('from')?->startOfDay() ?? now()->subDays(29)->startOfDay();
         $to = $request->date('to')?->endOfDay() ?? now()->endOfDay();
-        $base = DoctorReel::whereBetween('created_at', [$from, $to]);
+        $base = DoctorReel::whereBetween('doctor_reels.created_at', [$from, $to]);
         $summary = ['total' => (clone $base)->count(), 'completed' => (clone $base)->where('status', 'completed')->count(), 'failed' => (clone $base)->where('status', 'failed')->count(), 'downloads' => (clone $base)->sum('download_count')];
         $byType = collect([
             'video' => (clone $base)->whereNotNull('original_video')->count(),
             'audio' => (clone $base)->whereHas('audioMessage')->count(),
             'card' => (clone $base)->whereHas('greetingCard')->count(),
         ]);
-        $byCity = (clone $base)->selectRaw('city, COUNT(*) total')->groupBy('city')->orderByDesc('total')->limit(10)->get();
-        $daily = (clone $base)->selectRaw('DATE(created_at) day, COUNT(*) total')->groupBy('day')->orderBy('day')->get();
+        $byCity = (clone $base)->join('doctors', 'doctors.id', '=', 'doctor_reels.doctor_id')->selectRaw('doctors.city, COUNT(*) total')->groupBy('doctors.city')->orderByDesc('total')->limit(10)->get();
+        $daily = (clone $base)->selectRaw('DATE(doctor_reels.created_at) day, COUNT(*) total')->groupBy('day')->orderBy('day')->get();
 
         return view('admin.reports.index', compact('summary', 'byType', 'byCity', 'daily', 'from', 'to'));
     }

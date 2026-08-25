@@ -9,6 +9,7 @@ use App\Http\Requests\UploadRecordingRequest;
 use App\Jobs\GenerateAudioReel;
 use App\Jobs\GenerateDoctorReel;
 use App\Models\DoctorReel;
+use App\Models\Doctor;
 use App\Models\AudioMessage;
 use App\Models\GreetingCard;
 use App\Models\ReelStatusHistory;
@@ -37,8 +38,14 @@ class CampaignController extends Controller
             'session_id' => $request->session()->getId(),
         ]);
 
-        $reel = DoctorReel::query()->create($request->validated() + [
+        $validated = $request->validated();
+        $doctor = Doctor::query()->create([
+            'name' => $validated['doctor_name'],
             'speciality' => 'Not specified',
+            'city' => $validated['city'],
+        ]);
+        $reel = $doctor->reels()->create([
+            'consent' => $validated['consent'],
             'reference_id' => 'TDR-'.now()->format('ymd').'-'.Str::upper(Str::random(6)),
             'status' => 'awaiting_recording',
         ]);

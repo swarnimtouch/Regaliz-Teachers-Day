@@ -17,14 +17,15 @@ class DoctorReelsExport implements FromQuery, ShouldAutoSize, WithHeadings, With
 
     public function query(): Builder
     {
-        return DoctorReel::query()
+        return DoctorReel::query()->with(['doctor', 'audioMessage', 'greetingCard'])
             ->when(trim($this->filters['search'] ?? ''), function (Builder $query, string $search): void {
                 $term = '%'.trim($search).'%';
                 $query->where(function (Builder $inner) use ($term): void {
-                    $inner->where('doctor_name', 'like', $term)
-                        ->orWhere('reference_id', 'like', $term)
-                        ->orWhere('speciality', 'like', $term)
-                        ->orWhere('city', 'like', $term);
+                    $inner->where('reference_id', 'like', $term)
+                        ->orWhereHas('doctor', fn (Builder $doctor) => $doctor
+                            ->where('name', 'like', $term)
+                            ->orWhere('speciality', 'like', $term)
+                            ->orWhere('city', 'like', $term));
                 });
             })
             ->when($this->filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\DoctorReel;
+use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,7 +15,8 @@ class AdminModulesTest extends TestCase
     public function test_admin_modules_and_excel_export_are_accessible_to_an_admin(): void
     {
         $admin = User::factory()->create(['role' => 'super_admin', 'status' => true]);
-        $reel = DoctorReel::create(['reference_id' => 'TDR-ADMIN-TEST', 'doctor_name' => 'Dr Admin Test', 'speciality' => 'Medicine', 'city' => 'Mumbai', 'consent' => true, 'content_type' => 'video']);
+        $doctor = Doctor::create(['name' => 'Dr Admin Test', 'speciality' => 'Medicine', 'city' => 'Mumbai']);
+        $reel = DoctorReel::create(['doctor_id' => $doctor->id, 'reference_id' => 'TDR-ADMIN-TEST', 'consent' => true, 'content_type' => 'video']);
 
         $this->actingAs($admin);
         $this->get(route('admin.dashboard'))->assertOk();

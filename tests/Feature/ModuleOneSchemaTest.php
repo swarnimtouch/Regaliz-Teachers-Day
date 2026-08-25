@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\DoctorReel;
+use App\Models\Doctor;
 use App\Models\ReelStatusHistory;
 use App\Models\ReelTemplate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,11 +23,14 @@ class ModuleOneSchemaTest extends TestCase
             'is_default' => true,
         ]);
 
-        $reel = DoctorReel::query()->create([
-            'reference_id' => 'TDR-TEST-0001',
-            'doctor_name' => 'Dr Test',
+        $doctor = Doctor::query()->create([
+            'name' => 'Dr Test',
             'speciality' => 'Medicine',
             'city' => 'Mumbai',
+        ]);
+        $reel = DoctorReel::query()->create([
+            'doctor_id' => $doctor->id,
+            'reference_id' => 'TDR-TEST-0001',
             'consent' => true,
             'template_id' => $template->id,
         ]);
@@ -37,6 +41,7 @@ class ModuleOneSchemaTest extends TestCase
         ]);
 
         $this->assertTrue($reel->fresh()->template->is($template));
+        $this->assertTrue($reel->fresh()->doctor->is($doctor));
         $this->assertCount(1, $reel->statusHistories);
 
         $reel->delete();
