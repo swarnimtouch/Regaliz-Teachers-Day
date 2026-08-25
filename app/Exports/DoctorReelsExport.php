@@ -47,18 +47,39 @@ class DoctorReelsExport implements FromQuery, ShouldAutoSize, WithHeadings, With
 
     public function headings(): array
     {
-        return ['Reference ID', 'Name', 'City', 'Type', 'Status', 'Downloads', 'Submitted At', 'Completed At'];
+        $type = $this->filters['media_type'] ?? $this->filters['content_type'] ?? null;
+        $mediaHeadings = match ($type) {
+            'video' => ['Original Video S3 URL', 'Generated Video S3 URL'],
+            'audio' => ['Original Audio S3 URL', 'Generated Audio S3 URL'],
+            'card' => ['Original S3 URL', 'Generated Card S3 URL'],
+            default => ['Original Media S3 URL', 'Generated Media S3 URL'],
+        };
+
+        return array_merge(['Reference ID', 'Name', 'City', 'Type', 'Status', 'Downloads', 'Submitted At', 'Completed At'], $mediaHeadings);
     }
 
     public function map($reel): array
     {
-        return [$reel->reference_id, $reel->doctor_name, $reel->city, $this->filters['media_type'] ?? $reel->content_type, $reel->status, $reel->download_count, $reel->created_at, $reel->processing_completed_at];
+        $type = $this->filters['media_type'] ?? $reel->content_type;
+        $audioUrl = $reel->audioMessage?->original_audio_url ?? $reel->original_audio_url;
+        $generatedAudioUrl = $reel->audioMessage?->generated_video_url;
+        $cardUrl = $reel->greetingCard?->generated_card_url ?? $reel->generated_card_url;
+        [$originalUrl, $generatedUrl] = match ($type) {
+            'audio' => [$audioUrl, $generatedAudioUrl],
+            'card' => [null, $cardUrl],
+            default => [$reel->original_video_url, $reel->generated_video_url],
+        };
+
+        $createdAt = $reel->created_at?->copy()->timezone('Asia/Kolkata')->format('d M Y, h:i A');
+        $completedAt = $reel->processing_completed_at?->copy()->timezone('Asia/Kolkata')->format('d M Y, h:i A');
+
+        return [$reel->reference_id, $reel->doctor_name, $reel->city, $type, $reel->status, $reel->download_count, $createdAt, $completedAt, $originalUrl, $generatedUrl];
     }
 
     public function styles(Worksheet $sheet): array
     {
-        $sheet->getStyle('A1:H1')->getFill()->setFillType('solid')->getStartColor()->setARGB('FF245337');
-        $sheet->getStyle('A1:H1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A1:J1')->getFill()->setFillType('solid')->getStartColor()->setARGB('FF245337');
+        $sheet->getStyle('A1:J1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
         $sheet->freezePane('A2');
         $sheet->setAutoFilter($sheet->calculateWorksheetDimension());
 

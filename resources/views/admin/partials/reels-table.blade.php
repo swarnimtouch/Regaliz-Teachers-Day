@@ -7,7 +7,7 @@
                 <th>City</th>
                 <th>Type</th>
                 <th>Status</th>
-                <th>Submitted</th>
+                <th>Created At</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -19,7 +19,7 @@
                     <td>{{ $reel->city }}</td>
                     <td>{{ ucfirst($filters['media_type'] ?? ($reel->content_type ?: 'Not selected')) }}</td>
                     <td><span class="status {{ $reel->status }}">{{ str_replace('_', ' ', $reel->status) }}</span></td>
-                    <td>{{ $reel->created_at->format('d M Y, h:i A') }}</td>
+                    <td>{{ $reel->created_at->copy()->timezone('Asia/Kolkata')->format('d M Y, h:i A') }}</td>
                     <td><a class="table-action" href="{{ route('admin.doctors.show', [$reel, 'media_type' => $filters['media_type'] ?? $reel->content_type]) }}">View</a></td>
                 </tr>
             @empty

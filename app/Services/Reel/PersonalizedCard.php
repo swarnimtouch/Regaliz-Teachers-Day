@@ -3,11 +3,14 @@
 namespace App\Services\Reel;
 
 use App\Models\DoctorReel;
+use App\Services\MediaStorage;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class PersonalizedCard
 {
+    public function __construct(private readonly MediaStorage $media) {}
+
     public function saveRendered(DoctorReel $reel, string $dataUrl): string
     {
         if (! preg_match('/^data:image\/png;base64,([A-Za-z0-9+\/=]+)$/', $dataUrl, $matches)) {
@@ -25,8 +28,8 @@ class PersonalizedCard
             throw new RuntimeException('The rendered card has invalid dimensions.');
         }
 
-        $path = 'cards/'.now()->format('Y/m').'/'.$reel->reference_id.'.png';
-        Storage::disk('local')->put($path, $contents);
+        $path = $this->media->path('cards/'.$reel->reference_id.'.png');
+        $this->media->disk()->put($path, $contents);
 
         return $path;
     }

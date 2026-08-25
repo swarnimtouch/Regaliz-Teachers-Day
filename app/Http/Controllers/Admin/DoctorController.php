@@ -7,12 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Jobs\GenerateAudioReel;
 use App\Jobs\GenerateDoctorReel;
 use App\Models\DoctorReel;
+use App\Services\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DoctorController extends Controller
 {
@@ -57,19 +59,22 @@ class DoctorController extends Controller
         return back()->with('success', 'Regeneration completed or queued successfully.');
     }
 
-    public function download(Request $request, DoctorReel $doctorReel): BinaryFileResponse
+    public function download(Request $request, DoctorReel $doctorReel, MediaStorage $media): StreamedResponse
     {
-        $path = match ($request->query('media_type', $doctorReel->content_type)) {
-            'audio' => $doctorReel->audioMessage?->generated_video,
+        $type = $request->query('media_type', $doctorReel->content_type);
+        $path = match ($type) {
+            'audio' => $doctorReel->audioMessage?->original_audio,
             'card' => $doctorReel->generated_card,
             default => $doctorReel->generated_video,
         };
-        abort_unless($path && Storage::disk('local')->exists($path), 404);
+        abort_unless($path && $media->disk()->exists($path), 404);
 
-        return response()->download(Storage::disk('local')->path($path));
+        $extension = $type === 'card' ? 'png' : ($type === 'audio' ? (pathinfo($path, PATHINFO_EXTENSION) ?: 'webm') : 'mp4');
+        $name = (\Illuminate\Support\Str::slug($doctorReel->doctor_name) ?: 'teacher-message').'-'.$type.'.'.$extension;
+        return $media->download($path, $name);
     }
 
-    public function media(DoctorReel $doctorReel, string $kind): BinaryFileResponse
+    public function media(DoctorReel $doctorReel, string $kind, MediaStorage $media): StreamedResponse
     {
         $path = match ($kind) {
             'original-video' => $doctorReel->original_video,
@@ -79,17 +84,21 @@ class DoctorController extends Controller
             'card' => $doctorReel->generated_card,
             default => null,
         };
-        abort_unless($path && Storage::disk('local')->exists($path), 404);
+        abort_unless($path && $media->disk()->exists($path), 404);
 
-        return response()->file(Storage::disk('local')->path($path));
+        $contentType = $media->disk()->mimeType($path) ?: ($kind === 'card' ? 'image/png' : ($kind === 'original-audio' ? 'audio/webm' : 'video/mp4'));
+        return $media->stream($path, $contentType);
     }
 
-    public function destroy(DoctorReel $doctorReel): RedirectResponse
+    public function destroy(DoctorReel $doctorReel, MediaStorage $media): RedirectResponse
     {
-        foreach ([$doctorReel->original_video, $doctorReel->audioMessage?->original_audio, $doctorReel->generated_video, $doctorReel->audioMessage?->generated_video, $doctorReel->generated_card, $doctorReel->details_image] as $path) {
+        foreach ([$doctorReel->original_video, $doctorReel->audioMessage?->original_audio, $doctorReel->generated_video, $doctorReel->audioMessage?->generated_video, $doctorReel->generated_card] as $path) {
             if ($path) {
-                Storage::disk('local')->delete($path);
+                $media->disk()->delete($path);
             }
+        }
+        if ($doctorReel->details_image) {
+            Storage::disk('local')->delete($doctorReel->details_image);
         }
         $doctorReel->delete();
 

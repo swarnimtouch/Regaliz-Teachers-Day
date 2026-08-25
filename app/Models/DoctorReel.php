@@ -13,7 +13,7 @@ class DoctorReel extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['reference_id', 'doctor_name', 'speciality', 'city', 'consent', 'content_type', 'teacher_name', 'card_message', 'original_video', 'original_audio', 'video_zoom', 'details_image', 'generated_video', 'generated_card', 'template_id', 'status', 'error_message', 'download_count', 'processing_started_at', 'processing_completed_at', 'processing_failed_at'];
+    protected $fillable = ['reference_id', 'doctor_name', 'speciality', 'city', 'consent', 'content_type', 'teacher_name', 'card_message', 'original_video', 'original_video_url', 'original_audio', 'original_audio_url', 'video_zoom', 'details_image', 'generated_video', 'generated_video_url', 'generated_card', 'generated_card_url', 'template_id', 'status', 'error_message', 'download_count', 'processing_started_at', 'processing_completed_at', 'processing_failed_at'];
 
     public function getRouteKeyName(): string
     {

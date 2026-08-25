@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\DoctorReel;
 use App\Services\FFmpeg\ReelRenderer;
+use App\Services\MediaStorage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -24,7 +25,7 @@ class GenerateDoctorReel implements ShouldQueue
 
     public function __construct(public DoctorReel $doctorReel) {}
 
-    public function handle(ReelRenderer $renderer): void
+    public function handle(ReelRenderer $renderer, MediaStorage $media): void
     {
         Log::info('Video reel job started', [
             'reference_id' => $this->doctorReel->reference_id,
@@ -32,7 +33,7 @@ class GenerateDoctorReel implements ShouldQueue
         ]);
         $this->doctorReel->update(['status' => 'processing', 'processing_started_at' => $this->doctorReel->processing_started_at ?? now()]);
         $output = $renderer->render($this->doctorReel);
-        $this->doctorReel->update(['generated_video' => $output, 'status' => 'completed', 'processing_completed_at' => now(), 'error_message' => null]);
+        $this->doctorReel->update(['generated_video' => $output, 'generated_video_url' => $media->url($output), 'status' => 'completed', 'processing_completed_at' => now(), 'error_message' => null]);
         $this->doctorReel->statusHistories()->create(['status' => 'completed', 'message' => 'Teacher\'s Day reel generated']);
         Log::info('Video reel job completed', [
             'reference_id' => $this->doctorReel->reference_id,

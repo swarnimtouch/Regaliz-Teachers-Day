@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\DoctorReel;
 use App\Services\FFmpeg\AudioReelRenderer;
+use App\Services\MediaStorage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,7 +23,7 @@ class GenerateAudioReel implements ShouldQueue
 
     public function __construct(public DoctorReel $doctorReel) {}
 
-    public function handle(AudioReelRenderer $renderer): void
+    public function handle(AudioReelRenderer $renderer, MediaStorage $media): void
     {
         Log::info('Audio reel job started', [
             'reference_id' => $this->doctorReel->reference_id,
@@ -31,6 +32,7 @@ class GenerateAudioReel implements ShouldQueue
         $output = $renderer->render($this->doctorReel);
         $this->doctorReel->audioMessage()->update([
             'generated_video' => $output,
+            'generated_video_url' => $media->url($output),
             'status' => 'completed',
             'processing_completed_at' => now(),
             'error_message' => null,

@@ -16,7 +16,7 @@
             <dt>Status</dt>
             <dd>{{ ucfirst($reel->status) }}</dd>
             <dt>Submitted</dt>
-            <dd>{{ $reel->created_at->format('d M Y, h:i A') }}</dd>
+            <dd>{{ $reel->created_at->copy()->timezone('Asia/Kolkata')->format('d M Y, h:i A') }}</dd>
             <dt>Downloads</dt>
             <dd>{{ $reel->download_count }}</dd>
 

@@ -14,6 +14,8 @@ return [
     */
 
     'default' => env('FILESYSTEM_DISK', 'local'),
+    'media' => env('MEDIA_DISK', env('FILESYSTEM_DISK', 'local')),
+    'media_prefix' => trim(env('MEDIA_PREFIX', 'Teachers-Day'), '/'),
 
     /*
     |--------------------------------------------------------------------------

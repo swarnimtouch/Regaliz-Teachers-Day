@@ -3,6 +3,7 @@
 namespace App\Services\FFmpeg;
 
 use App\Models\DoctorReel;
+use App\Services\MediaStorage;
 use App\Services\Reel\TemplateArtwork;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
@@ -10,18 +11,17 @@ use RuntimeException;
 
 class ReelRenderer
 {
-    public function __construct(private readonly TemplateArtwork $artwork) {}
+    public function __construct(private readonly TemplateArtwork $artwork, private readonly MediaStorage $media) {}
 
     public function render(DoctorReel $reel): string
     {
-        if (! $reel->original_video || ! Storage::disk('local')->exists($reel->original_video)) {
+        if (! $reel->original_video || ! $this->media->disk()->exists($reel->original_video)) {
             throw new RuntimeException('The source recording is missing.');
         }
 
-        $output = 'reels/'.now()->format('Y/m').'/'.$reel->reference_id.'.mp4';
-        Storage::disk('local')->makeDirectory(dirname($output));
-        $inputPath = Storage::disk('local')->path($reel->original_video);
-        $outputPath = Storage::disk('local')->path($output);
+        $output = $this->media->path('videos/'.$reel->reference_id.'.mp4');
+        $inputPath = $this->media->localPath($reel->original_video);
+        $outputPath = $this->media->outputPath($output);
         $templatePath = public_path('videos/teachers-day-animation.mp4');
         if (! is_file($templatePath)) {
             throw new RuntimeException('The Teacher\'s Day animation template is missing.');
@@ -46,6 +46,9 @@ class ReelRenderer
         if ($result->failed()) {
             throw new RuntimeException('FFmpeg failed: '.mb_substr($result->errorOutput(), -1500));
         }
+
+        $this->media->publish($outputPath, $output);
+        $this->media->cleanupLocalCopy($inputPath);
 
         return $output;
     }

@@ -3,6 +3,7 @@
 namespace App\Services\FFmpeg;
 
 use App\Models\DoctorReel;
+use App\Services\MediaStorage;
 use App\Services\Reel\TemplateArtwork;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
@@ -10,34 +11,38 @@ use RuntimeException;
 
 class AudioReelRenderer
 {
-    public function __construct(private readonly TemplateArtwork $artwork) {}
+    public function __construct(private readonly TemplateArtwork $artwork, private readonly MediaStorage $media) {}
 
     public function render(DoctorReel $reel): string
     {
-        if (! $reel->original_audio || ! Storage::disk('local')->exists($reel->original_audio)) {
+        if (! $reel->original_audio || ! $this->media->disk()->exists($reel->original_audio)) {
             throw new RuntimeException('The source audio is missing.');
         }
 
-        $output = 'reels/'.now()->format('Y/m').'/'.$reel->reference_id.'-audio.mp4';
-        Storage::disk('local')->makeDirectory(dirname($output));
+        $output = $this->media->path('audios/'.$reel->reference_id.'.mp4');
+        $inputPath = $this->media->localPath($reel->original_audio);
+        $outputPath = $this->media->outputPath($output);
         $banner = Storage::disk('local')->path($this->artwork->buildAudioBanner($reel));
         $waveVideo = public_path('videos/audio-wave-green-screen.mp4');
         if (! is_file($waveVideo)) {
             throw new RuntimeException('The audio wave animation is missing.');
         }
-        $duration = $this->mediaDuration(Storage::disk('local')->path($reel->original_audio));
+        $duration = $this->mediaDuration($inputPath);
         $filter = "[0:a]atrim=duration={$duration},asetpts=PTS-STARTPTS[voice];[1:v]scale=1080:1920,setsar=1,trim=duration={$duration},setpts=PTS-STARTPTS[board];[2:v]crop=1920:420:0:300,scale=780:110,format=rgba,colorkey=0x2fa83d:0.30:0.10,trim=duration={$duration},setpts=PTS-STARTPTS[wave];[board][wave]overlay=150:1645:shortest=1,format=yuv420p[v]";
         $result = Process::timeout(300)->run([
-            config('services.ffmpeg.binary', 'ffmpeg'), '-y', '-i', Storage::disk('local')->path($reel->original_audio),
+            config('services.ffmpeg.binary', 'ffmpeg'), '-y', '-i', $inputPath,
             '-loop', '1', '-framerate', '30', '-i', $banner, '-stream_loop', '-1', '-i', $waveVideo, '-filter_complex', $filter,
             '-map', '[v]', '-map', '[voice]', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '24',
             '-r', '30', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart',
-            Storage::disk('local')->path($output),
+            $outputPath,
         ]);
 
         if ($result->failed()) {
             throw new RuntimeException('FFmpeg audio reel failed: '.mb_substr($result->errorOutput(), -1500));
         }
+
+        $this->media->publish($outputPath, $output);
+        $this->media->cleanupLocalCopy($inputPath);
 
         return $output;
     }

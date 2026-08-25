@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AudioMessage extends Model
 {
-    protected $fillable = ['doctor_reel_id', 'original_audio', 'generated_video', 'status', 'error_message', 'processing_started_at', 'processing_completed_at'];
+    protected $fillable = ['doctor_reel_id', 'original_audio', 'original_audio_url', 'generated_video', 'generated_video_url', 'status', 'error_message', 'processing_started_at', 'processing_completed_at'];
 
     protected function casts(): array
     {
