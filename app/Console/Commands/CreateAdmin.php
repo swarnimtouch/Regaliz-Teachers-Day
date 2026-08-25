@@ -14,6 +14,7 @@ class CreateAdmin extends Command
 
     protected $description = 'Create or update a database-backed administrator account';
 
+
     public function handle(): int
     {
         $email = $this->argument('email') ?: $this->ask('Email address');
