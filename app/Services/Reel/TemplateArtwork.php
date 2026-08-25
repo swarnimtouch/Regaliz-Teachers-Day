@@ -30,10 +30,17 @@ class TemplateArtwork
         }
         imagealphablending($image, true);
 
-        // Clear the baked-in "From" placeholder and redraw it slightly higher.
+        $reel->loadMissing('doctor');
+        $senderName = trim((string) $reel->doctor?->name);
+        if ($senderName === '') {
+            throw new RuntimeException('The registered doctor name is missing.');
+        }
+
+        // Clear the baked-in "From" placeholder and redraw it with the registered user's name.
         imagecopy($image, $image, 135, 1738, 135, 1628, 700, 72);
         $white = imagecolorallocate($image, 255, 255, 255);
-        imagettftext($image, 24, 0, 142, 1810, $white, $this->boldFont(), 'From, '.$reel->doctor_name);
+        $fontSize = mb_strlen($senderName) > 28 ? 19 : (mb_strlen($senderName) > 20 ? 21 : 24);
+        imagettftext($image, $fontSize, 0, 142, 1810, $white, $this->boldFont(), 'From, '.$senderName);
 
         imagepng($image, Storage::disk('local')->path($path));
         imagedestroy($image);
