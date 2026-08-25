@@ -224,11 +224,11 @@ class CampaignController extends Controller
     public function download(MediaStorage $media): StreamedResponse
     {
         $doctorReel = $this->currentReel();
-        $path = $doctorReel->content_type === 'audio' ? $doctorReel->audioMessage?->original_audio : $doctorReel->generated_video;
+        $path = $doctorReel->content_type === 'audio' ? $doctorReel->audioMessage?->generated_video : $doctorReel->generated_video;
         abort_unless($doctorReel->status === 'completed' && $path && $media->disk()->exists($path), 404);
         $doctorReel->increment('download_count');
 
-        $suffix = $doctorReel->content_type === 'audio' ? '-audio-message.'.(pathinfo($path, PATHINFO_EXTENSION) ?: 'webm') : '-video-message.mp4';
+        $suffix = $doctorReel->content_type === 'audio' ? '-audio-reel.mp4' : '-video-message.mp4';
         return $media->download($path, $this->downloadBaseName($doctorReel).$suffix);
     }
 

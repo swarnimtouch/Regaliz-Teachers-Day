@@ -63,13 +63,13 @@ class DoctorController extends Controller
     {
         $type = $request->query('media_type', $doctorReel->content_type);
         $path = match ($type) {
-            'audio' => $doctorReel->audioMessage?->original_audio,
+            'audio' => $doctorReel->audioMessage?->generated_video,
             'card' => $doctorReel->generated_card,
             default => $doctorReel->generated_video,
         };
         abort_unless($path && $media->disk()->exists($path), 404);
 
-        $extension = $type === 'card' ? 'png' : ($type === 'audio' ? (pathinfo($path, PATHINFO_EXTENSION) ?: 'webm') : 'mp4');
+        $extension = $type === 'card' ? 'png' : 'mp4';
         $name = (\Illuminate\Support\Str::slug($doctorReel->doctor_name) ?: 'teacher-message').'-'.$type.'.'.$extension;
         return $media->download($path, $name);
     }
