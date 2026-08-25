@@ -36,11 +36,11 @@ class TemplateArtwork
             throw new RuntimeException('The registered doctor name is missing.');
         }
 
-        // Clear the baked-in "From" placeholder and redraw it with the registered user's name.
-        imagecopy($image, $image, 135, 1738, 135, 1628, 700, 72);
+        // Clear the baked-in dotted placeholder using a clean chalkboard strip.
+        imagecopy($image, $image, 105, 1510, 105, 1420, 720, 95);
         $white = imagecolorallocate($image, 255, 255, 255);
         $fontSize = mb_strlen($senderName) > 28 ? 19 : (mb_strlen($senderName) > 20 ? 21 : 24);
-        imagettftext($image, $fontSize, 0, 142, 1810, $white, $this->boldFont(), 'From, '.$senderName);
+        imagettftext($image, $fontSize, 0, 122, 1575, $white, $this->boldFont(), 'From, '.$senderName);
 
         imagepng($image, Storage::disk('local')->path($path));
         imagedestroy($image);
