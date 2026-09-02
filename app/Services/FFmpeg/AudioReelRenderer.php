@@ -33,7 +33,8 @@ class AudioReelRenderer
             config('services.ffmpeg.binary', 'ffmpeg'), '-y', '-i', $inputPath,
             '-loop', '1', '-framerate', '30', '-i', $banner, '-stream_loop', '-1', '-i', $waveVideo, '-filter_complex', $filter,
             '-map', '[v]', '-map', '[voice]', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '24',
-            '-r', '30', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart',
+            '-r', '30', '-pix_fmt', 'yuv420p', '-profile:v', 'main', '-level', '4.0',
+            '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart',
             $outputPath,
         ]);
 

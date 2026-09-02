@@ -4,7 +4,6 @@ namespace App\Services\Reel;
 
 use App\Models\DoctorReel;
 use App\Services\MediaStorage;
-use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class PersonalizedCard
@@ -40,8 +39,8 @@ class PersonalizedCard
             throw new RuntimeException('PHP GD is required to create cards.');
         }
 
-        $path = 'cards/'.now()->format('Y/m').'/'.$reel->reference_id.'.png';
-        Storage::disk('local')->makeDirectory(dirname($path));
+        $path = $this->media->path('cards/'.$reel->reference_id.'.png');
+        $outputPath = $this->media->outputPath($path);
         $height = 1620;
         $image = imagecreatetruecolor(1080, $height);
         [$primary, $accent, $text] = $this->drawBackground($image, $template);
@@ -59,8 +58,9 @@ class PersonalizedCard
             $this->renderChalkboard($image, $reel, $primary, $accent, $text, $font, $bold);
         }
 
-        imagepng($image, Storage::disk('local')->path($path));
+        imagepng($image, $outputPath);
         imagedestroy($image);
+        $this->media->publish($outputPath, $path);
 
         return $path;
     }

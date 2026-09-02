@@ -5,9 +5,9 @@
 @section('content')
     @php($selectedTemplate = old('card_template', session('card_template', 'chalkboard')))
     @php($templateImages = [
-        'chalkboard' => asset('images/blackboard-card-template-v3.png'),
-        'golden' => asset('images/golden-card-template-v3.png'),
-        'notebook' => asset('images/notebook-card-template-v2.png'),
+        'chalkboard' => '/images/blackboard-card-template-v3.png',
+        'golden' => '/images/golden-card-template-v3.png',
+        'notebook' => '/images/notebook-card-template-v2.png',
     ])
     <section class="card-maker section-wrap">
         <div class="card-form-copy">
@@ -16,7 +16,6 @@
             <p>Your teacher's name, your own words and your professional details will create a unique downloadable card.</p>
             <form id="cardForm" class="premium-form" method="POST" action="{{ route('campaign.store-card') }}">
                 @csrf
-                <input id="renderedCard" type="hidden" name="rendered_card">
                 <fieldset class="card-template-picker">
                     <legend>Choose a card template <span>*</span></legend>
                     <label><input type="radio" name="card_template" value="chalkboard" @checked($selectedTemplate === 'chalkboard')><span class="template-thumb template-chalkboard" style="background-image:url('{{ $templateImages['chalkboard'] }}')"><b>BLACKBOARD</b><small>Classroom tribute</small></span></label>
@@ -53,9 +52,6 @@
         const seal = document.querySelector('#cardSeal');
         const footer = document.querySelector('#cardFooter');
         const templateImages = @json($templateImages);
-        const form = document.querySelector('#cardForm');
-        const renderedCard = document.querySelector('#renderedCard');
-        const submitButton = form.querySelector('button[type="submit"], button:not([type])');
         name.addEventListener('input', () => previewName.textContent = `Dear ${name.value.trim() || 'Teacher'},`);
         const resizePreviewMessage = () => {
             const value = message.value.trim();
@@ -97,40 +93,7 @@
         message.dispatchEvent(new Event('input'));
         document.querySelector('[name="card_template"]:checked')?.dispatchEvent(new Event('change'));
 
-        let previewCaptured = false;
-        form.addEventListener('submit', async event => {
-            if (previewCaptured) return;
-
-            event.preventDefault();
-            submitButton.disabled = true;
-            submitButton.textContent = 'Creating your card...';
-
-            try {
-                await document.fonts.ready;
-                if (!window.cardToPng) throw new Error('Card renderer is not ready.');
-
-                const scale = 1080 / preview.offsetWidth;
-                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-                renderedCard.value = await window.cardToPng(preview, {
-                    cacheBust: true,
-                    pixelRatio: scale,
-                    width: preview.offsetWidth,
-                    height: preview.offsetHeight,
-                });
-                previewCaptured = true;
-                form.submit();
-            } catch (error) {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Create my card →';
-                alert('Card preview could not be prepared. Please try again.');
-            }
-        });
-
         window.addEventListener('pageshow', () => {
-            previewCaptured = false;
-            renderedCard.value = '';
-            submitButton.disabled = false;
-            submitButton.textContent = 'Create my card →';
             name.value = '';
             message.value = '';
             const firstTemplate = document.querySelector('[name="card_template"][value="chalkboard"]');

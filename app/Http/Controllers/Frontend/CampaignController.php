@@ -18,7 +18,6 @@ use App\Services\MediaStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -176,7 +175,6 @@ class CampaignController extends Controller
             'teacher_name' => ['required', 'string', 'max:80'],
             'card_message' => ['required', 'string', 'max:240'],
             'card_template' => ['required', 'in:chalkboard,golden,notebook'],
-            'rendered_card' => ['required', 'string', 'max:12000000'],
         ]);
         $reel = $this->currentReel();
         $reel->update([
@@ -184,7 +182,7 @@ class CampaignController extends Controller
             'card_message' => $validated['card_message'],
             'content_type' => 'card',
         ]);
-        $generatedCard = $card->saveRendered($reel, $validated['rendered_card']);
+        $generatedCard = $card->generate($reel, $validated['card_template']);
         GreetingCard::query()->updateOrCreate(
             ['doctor_reel_id' => $reel->id],
             ['teacher_name' => $validated['teacher_name'], 'message' => $validated['card_message'], 'generated_card' => $generatedCard, 'generated_card_url' => $media->url($generatedCard), 'status' => 'completed', 'processing_completed_at' => now()]
@@ -239,13 +237,13 @@ class CampaignController extends Controller
         return $media->download($path, $this->downloadBaseName($doctorReel).$suffix);
     }
 
-    public function previewReel(MediaStorage $media): StreamedResponse
+    public function previewReel(Request $request, MediaStorage $media): StreamedResponse
     {
         $doctorReel = $this->currentReel();
         $path = $doctorReel->content_type === 'audio' ? $doctorReel->audioMessage?->generated_video : $doctorReel->generated_video;
         abort_unless($doctorReel->status === 'completed' && $path && $media->disk()->exists($path), 404);
 
-        return $media->stream($path, 'video/mp4');
+        return $media->stream($path, 'video/mp4', $request);
     }
 
     private function currentReel(): DoctorReel

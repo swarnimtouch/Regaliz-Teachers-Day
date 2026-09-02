@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -103,7 +104,11 @@ class MediaStorage
 
     public function download(string $path, string $filename): StreamedResponse
     {
-        return $this->disk()->download($path, $filename);
+        return $this->disk()->download($path, $filename, [
+            'Content-Type' => $this->disk()->mimeType($path) ?: 'application/octet-stream',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-store',
+        ]);
     }
 
     public function url(string $path): string
@@ -111,19 +116,56 @@ class MediaStorage
         return $this->disk()->url($path);
     }
 
-    public function stream(string $path, string $contentType): StreamedResponse
+    public function stream(string $path, string $contentType, ?Request $request = null): StreamedResponse
     {
-        return response()->stream(function () use ($path): void {
+        $size = $this->disk()->size($path);
+        $start = 0;
+        $end = max(0, $size - 1);
+        $status = 200;
+        $range = $request?->header('Range');
+
+        if ($range && preg_match('/^bytes=(\d*)-(\d*)$/', trim($range), $matches)) {
+            if ($matches[1] === '' && $matches[2] !== '') {
+                $start = max(0, $size - (int) $matches[2]);
+            } else {
+                $start = (int) $matches[1];
+                $end = $matches[2] !== '' ? min((int) $matches[2], $size - 1) : $end;
+            }
+
+            if ($start >= $size || $start > $end) {
+                return response()->stream(static function (): void {}, 416, [
+                    'Content-Range' => 'bytes */'.$size,
+                    'Accept-Ranges' => 'bytes',
+                ]);
+            }
+            $status = 206;
+        }
+
+        $length = $end - $start + 1;
+        return response()->stream(function () use ($path, $start, $length): void {
             $stream = $this->disk()->readStream($path);
             if ($stream !== false) {
-                fpassthru($stream);
+                if ($start > 0) {
+                    if (@fseek($stream, $start) !== 0) {
+                        stream_get_contents($stream, $start);
+                    }
+                }
+                $remaining = $length;
+                while ($remaining > 0 && ! feof($stream)) {
+                    $chunk = fread($stream, min(1024 * 1024, $remaining));
+                    if ($chunk === false || $chunk === '') break;
+                    echo $chunk;
+                    $remaining -= strlen($chunk);
+                }
                 fclose($stream);
             }
-        }, 200, [
+        }, $status, [
             'Content-Type' => $contentType,
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-            'Pragma' => 'no-cache',
-            'Expires' => '0',
+            'Content-Length' => (string) $length,
+            'Accept-Ranges' => 'bytes',
+            'Content-Range' => $status === 206 ? "bytes {$start}-{$end}/{$size}" : null,
+            'Cache-Control' => 'private, max-age=3600',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

@@ -39,6 +39,7 @@ class ReelRenderer
             config('services.ffmpeg.binary', 'ffmpeg'), '-y', '-i', $inputPath, '-i', $templatePath,
             '-loop', '1', '-i', $captionPath, '-filter_complex', $filter, '-map', '[v]', '-map', '[a]',
             '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '24', '-r', '30',
+            '-pix_fmt', 'yuv420p', '-profile:v', 'main', '-level', '4.0',
             '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart',
             '-shortest', $outputPath,
         ]);
