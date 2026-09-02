@@ -74,7 +74,8 @@ class CampaignController extends Controller
     public function selectFormat(Request $request): RedirectResponse
     {
         $validated = $request->validate(['content_type' => ['required', 'in:video,audio,card']]);
-        $this->currentReel()->update(['content_type' => $validated['content_type']]);
+        $reel = $this->freshSubmissionIfCompleted($this->currentReel());
+        $reel->update(['content_type' => $validated['content_type']]);
 
         $route = match ($validated['content_type']) {
             'audio' => 'campaign.record-audio',
@@ -175,14 +176,17 @@ class CampaignController extends Controller
             'teacher_name' => ['required', 'string', 'max:80'],
             'card_message' => ['required', 'string', 'max:250'],
             'card_template' => ['required', 'in:chalkboard,golden,notebook'],
+            'rendered_card' => ['nullable', 'string', 'max:12000000'],
         ]);
-        $reel = $this->currentReel();
+        $reel = $this->freshSubmissionIfCompleted($this->currentReel());
         $reel->update([
             'teacher_name' => $validated['teacher_name'],
             'card_message' => $validated['card_message'],
             'content_type' => 'card',
         ]);
-        $generatedCard = $card->generate($reel, $validated['card_template']);
+        $generatedCard = filled($validated['rendered_card'] ?? null)
+            ? $card->saveRendered($reel, $validated['rendered_card'])
+            : $card->generate($reel, $validated['card_template']);
         GreetingCard::query()->updateOrCreate(
             ['doctor_reel_id' => $reel->id],
             ['teacher_name' => $validated['teacher_name'], 'message' => $validated['card_message'], 'generated_card' => $generatedCard, 'generated_card_url' => $media->url($generatedCard), 'status' => 'completed', 'processing_completed_at' => now()]
@@ -257,6 +261,26 @@ class CampaignController extends Controller
     private function downloadBaseName(DoctorReel $reel): string
     {
         return Str::slug($reel->doctor_name) ?: 'teacher-message';
+    }
+
+    private function freshSubmissionIfCompleted(DoctorReel $reel): DoctorReel
+    {
+        if ($reel->status !== 'completed') {
+            return $reel;
+        }
+
+        $fresh = $reel->doctor->reels()->create([
+            'consent' => $reel->consent,
+            'reference_id' => 'TDR-'.now()->format('ymd').'-'.Str::upper(Str::random(6)),
+            'status' => 'awaiting_recording',
+        ]);
+        $fresh->statusHistories()->create([
+            'status' => 'awaiting_recording',
+            'message' => 'New campaign submission started',
+        ]);
+        session()->put('campaign_reel_id', $fresh->id);
+
+        return $fresh;
     }
 
     private function markDispatchFailed(DoctorReel $reel, \Throwable $exception): void

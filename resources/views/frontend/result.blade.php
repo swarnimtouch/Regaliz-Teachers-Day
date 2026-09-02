@@ -6,7 +6,7 @@
     <div class="eyebrow">✦ Your message</div>
     <h1>{{ $reel->status === 'completed' ? 'Ready to inspire.' : 'Still being crafted.' }}</h1>
     @if($reel->content_type === 'card' && $reel->generated_card)
-        <img class="result-card" src="{{ route('campaign.preview-card') }}" alt="Personalized Teacher's Day card">
+        <img class="result-card" src="{{ route('campaign.preview-card', ['v' => $reel->updated_at?->format('Uu') ?? now()->format('Uu')]) }}" alt="Personalized Teacher's Day card">
         <div class="result-actions" style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
             <a class="btn-gold" href="{{ route('campaign.download-card') }}">Download card ↓</a>
             <a class="btn-outline" href="{{ route('campaign.choose-format') }}">Back to formats</a>

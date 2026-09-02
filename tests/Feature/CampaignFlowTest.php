@@ -101,4 +101,36 @@ class CampaignFlowTest extends TestCase
         $this->assertSame([1080, 1620], [$image[0], $image[1]]);
         $this->assertSame(250, strlen($reel->card_message));
     }
+
+    public function test_a_second_card_is_stored_as_a_separate_admin_submission(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD is required for card rendering.');
+        }
+
+        Storage::fake('local');
+        config(['filesystems.media' => 'local', 'filesystems.media_prefix' => 'Teachers-Day']);
+        $doctor = Doctor::query()->create(['name' => 'Dr Aanya Sharma', 'speciality' => 'Cardiology', 'city' => 'Mumbai']);
+        $first = DoctorReel::query()->create([
+            'doctor_id' => $doctor->id,
+            'reference_id' => 'TDR-FIRST-CARD',
+            'consent' => true,
+            'content_type' => 'card',
+            'status' => 'awaiting_recording',
+        ]);
+
+        $card = fn (string $teacher, string $template) => $this->withSession(['campaign_reel_id' => session('campaign_reel_id', $first->id)])
+            ->post(route('campaign.store-card'), [
+                'teacher_name' => $teacher,
+                'card_message' => 'Thank you for always inspiring me.',
+                'card_template' => $template,
+            ]);
+
+        $card('Teacher One', 'chalkboard')->assertRedirect(route('campaign.result'));
+        $card('Teacher Two', 'golden')->assertRedirect(route('campaign.result'));
+
+        $this->assertSame(2, DoctorReel::query()->where('doctor_id', $doctor->id)->where('content_type', 'card')->count());
+        $this->assertSame(2, \App\Models\GreetingCard::query()->count());
+        $this->assertCount(2, DoctorReel::query()->pluck('generated_card')->unique());
+    }
 }

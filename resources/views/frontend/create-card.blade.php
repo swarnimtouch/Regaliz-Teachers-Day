@@ -6,9 +6,9 @@
     @php($selectedTemplate = old('card_template', session('card_template', 'chalkboard')))
     @php($assetBase = rtrim(request()->getBaseUrl(), '/'))
     @php($templateImages = [
-        'chalkboard' => $assetBase.'/images/blackboard-card-template-v3.png',
-        'golden' => $assetBase.'/images/golden-card-template-v3.png',
-        'notebook' => $assetBase.'/images/notebook-card-template-v2.png',
+        'chalkboard' => $assetBase.'/images/blackboard-card-template-v3.png?v='.filemtime(public_path('images/blackboard-card-template-v3.png')),
+        'golden' => $assetBase.'/images/golden-card-template-v3.png?v='.filemtime(public_path('images/golden-card-template-v3.png')),
+        'notebook' => $assetBase.'/images/notebook-card-template-v2.png?v='.filemtime(public_path('images/notebook-card-template-v2.png')),
     ])
     <section class="card-maker section-wrap">
         <div class="card-form-copy">
@@ -17,6 +17,7 @@
             <p>Your teacher's name, your own words and your professional details will create a unique downloadable card.</p>
             <form id="cardForm" class="premium-form" method="POST" action="{{ route('campaign.store-card') }}">
                 @csrf
+                <input id="renderedCard" type="hidden" name="rendered_card">
                 <fieldset class="card-template-picker">
                     <legend>Choose a card template <span>*</span></legend>
                     <label><input type="radio" name="card_template" value="chalkboard" @checked($selectedTemplate === 'chalkboard')><span class="template-thumb template-chalkboard" style="background-image:url('{{ $templateImages['chalkboard'] }}')"><b>BLACKBOARD</b><small>Classroom tribute</small></span></label>
@@ -53,6 +54,9 @@
         const seal = document.querySelector('#cardSeal');
         const footer = document.querySelector('#cardFooter');
         const templateImages = @json($templateImages);
+        const form = document.querySelector('#cardForm');
+        const renderedCard = document.querySelector('#renderedCard');
+        const submitButton = form.querySelector('button');
         name.addEventListener('input', () => previewName.textContent = `Dear ${name.value.trim() || 'Teacher'},`);
         const resizePreviewMessage = () => {
             const value = message.value.trim();
@@ -72,33 +76,68 @@
             count.value = message.value.length;
         });
         resizePreviewMessage();
-        document.querySelectorAll('[name="card_template"]').forEach(option => option.addEventListener('change', () => {
+        const selectTemplate = option => {
             preview.className = `unique-card-preview preview-${option.value}`;
-            preview.style.backgroundImage = `url("${templateImages[option.value]}")`;
+            preview.style.setProperty('background-image', `url("${templateImages[option.value]}")`, 'important');
             const copy = {
                 chalkboard: ["HAPPY TEACHER'S DAY", 'GURU', 'THE BEST TEACHERS HELP US REACH THE TOP'],
                 golden: ['CERTIFICATE OF APPRECIATION', '★', 'PRESENTED WITH RESPECT AND GRATITUDE'],
                 notebook: ["A NOTE FOR MY TEACHER", 'A+', 'THANK YOU FOR MAKING EVERY LESSON MATTER'],
             }[option.value];
             [kicker.textContent, seal.textContent, footer.textContent] = copy;
-            name.value = '';
-            message.value = '';
             name.dispatchEvent(new Event('input'));
             message.dispatchEvent(new Event('input'));
             resizePreviewMessage();
-        }));
+        };
+        document.querySelectorAll('[name="card_template"]').forEach(option => {
+            option.addEventListener('change', () => selectTemplate(option));
+            option.addEventListener('input', () => selectTemplate(option));
+        });
         name.dispatchEvent(new Event('input'));
         message.dispatchEvent(new Event('input'));
-        document.querySelector('[name="card_template"]:checked')?.dispatchEvent(new Event('change'));
+        const selectedOption = document.querySelector('[name="card_template"]:checked');
+        if (selectedOption) selectTemplate(selectedOption);
+
+        let submitting = false;
+        form.addEventListener('submit', async event => {
+            if (submitting) return;
+            event.preventDefault();
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creating your card...';
+
+            try {
+                await document.fonts.ready;
+                const background = new Image();
+                background.src = templateImages[document.querySelector('[name="card_template"]:checked').value];
+                await background.decode();
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                if (window.cardToPng) {
+                    renderedCard.value = await window.cardToPng(preview, {
+                        cacheBust: false,
+                        pixelRatio: 1080 / preview.getBoundingClientRect().width,
+                        width: preview.getBoundingClientRect().width,
+                        height: preview.getBoundingClientRect().height,
+                        skipAutoScale: true,
+                    });
+                }
+            } catch (error) {
+                renderedCard.value = '';
+            }
+
+            submitting = true;
+            form.submit();
+        });
 
         window.addEventListener('pageshow', () => {
-            name.value = '';
-            message.value = '';
-            const firstTemplate = document.querySelector('[name="card_template"][value="chalkboard"]');
-            firstTemplate.checked = true;
+            submitting = false;
+            renderedCard.value = '';
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create my card →';
             name.dispatchEvent(new Event('input'));
             message.dispatchEvent(new Event('input'));
-            firstTemplate.dispatchEvent(new Event('change'));
+            const currentOption = document.querySelector('[name="card_template"]:checked');
+            if (currentOption) selectTemplate(currentOption);
         });
     </script>
 @endpush
