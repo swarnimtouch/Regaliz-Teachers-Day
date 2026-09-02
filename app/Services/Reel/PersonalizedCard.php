@@ -71,9 +71,30 @@ class PersonalizedCard
         imagettftext($image, $size, 0, (int) ((1080 - ($box[2] - $box[0])) / 2), $y, $color, $font, $text);
     }
 
-    private function wrap(string $text, int $length): array
+    private function wrapToWidth(string $text, int $size, string $font, int $maxWidth = 760): array
     {
-        return explode("\n", wordwrap($text, $length, "\n", true));
+        $words = preg_split('/\s+/u', trim($text)) ?: [];
+        $lines = [];
+        $line = '';
+
+        foreach ($words as $word) {
+            $candidate = $line === '' ? $word : $line.' '.$word;
+            $box = imagettfbbox($size, 0, $font, $candidate);
+            $width = $box === false ? PHP_INT_MAX : abs($box[2] - $box[0]);
+
+            if ($line !== '' && $width > $maxWidth) {
+                $lines[] = $line;
+                $line = $word;
+            } else {
+                $line = $candidate;
+            }
+        }
+
+        if ($line !== '') {
+            $lines[] = $line;
+        }
+
+        return $lines ?: [''];
     }
 
     private function renderChalkboard($image, DoctorReel $reel, int $primary, int $accent, int $text, string $font, string $bold): void
@@ -83,14 +104,14 @@ class PersonalizedCard
         $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : $serifItalic;
         $this->center($image, 'Dear '.$reel->teacher_name.',', 56, 640, $accent, $serifBold);
         $messageLength = function_exists('mb_strlen') ? mb_strlen($reel->card_message) : strlen($reel->card_message);
-        [$messageSize, $wrapLength, $lineHeight] = match (true) {
-            $messageLength <= 45 => [58, 28, 72],
-            $messageLength <= 90 => [50, 34, 62],
-            $messageLength <= 150 => [42, 40, 52],
-            default => [32, 48, 40],
+        [$messageSize, $lineHeight] = match (true) {
+            $messageLength <= 45 => [58, 72],
+            $messageLength <= 90 => [50, 62],
+            $messageLength <= 150 => [42, 52],
+            default => [32, 40],
         };
 
-        $messageLines = $this->wrap($reel->card_message, $wrapLength);
+        $messageLines = $this->wrapToWidth($reel->card_message, $messageSize, $serifBoldItalic);
         $blockSpan = (count($messageLines) - 1) * $lineHeight;
         $startY = (int) (810 - ($blockSpan / 2) + ($messageSize / 3));
 
@@ -109,14 +130,14 @@ class PersonalizedCard
         $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : $serifItalic;
         $this->center($image, 'Dear '.$reel->teacher_name.',', 56, 640, $accent, $serifBold);
         $messageLength = function_exists('mb_strlen') ? mb_strlen($reel->card_message) : strlen($reel->card_message);
-        [$messageSize, $wrapLength, $lineHeight] = match (true) {
-            $messageLength <= 30 => [58, 28, 72],
-            $messageLength <= 60 => [50, 34, 62],
-            $messageLength <= 110 => [42, 40, 52],
-            $messageLength <= 170 => [37, 44, 46],
-            default => [31, 48, 39],
+        [$messageSize, $lineHeight] = match (true) {
+            $messageLength <= 30 => [58, 72],
+            $messageLength <= 60 => [50, 62],
+            $messageLength <= 110 => [42, 52],
+            $messageLength <= 170 => [37, 46],
+            default => [31, 39],
         };
-        $messageLines = $this->wrap($reel->card_message, $wrapLength);
+        $messageLines = $this->wrapToWidth($reel->card_message, $messageSize, $serifBoldItalic);
         $blockSpan = (count($messageLines) - 1) * $lineHeight;
         $startY = (int) (820 - ($blockSpan / 2) + ($messageSize / 3));
 
@@ -135,13 +156,13 @@ class PersonalizedCard
         $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : $serifItalic;
         $this->center($image, 'Dear '.$reel->teacher_name.',', 56, 640, $accent, $serifBold);
         $messageLength = function_exists('mb_strlen') ? mb_strlen($reel->card_message) : strlen($reel->card_message);
-        [$messageSize, $wrapLength, $lineHeight] = match (true) {
-            $messageLength <= 45 => [56, 28, 70],
-            $messageLength <= 90 => [48, 34, 60],
-            $messageLength <= 150 => [40, 40, 50],
-            default => [32, 48, 40],
+        [$messageSize, $lineHeight] = match (true) {
+            $messageLength <= 45 => [56, 70],
+            $messageLength <= 90 => [48, 60],
+            $messageLength <= 150 => [40, 50],
+            default => [32, 40],
         };
-        $messageLines = $this->wrap($reel->card_message, $wrapLength);
+        $messageLines = $this->wrapToWidth($reel->card_message, $messageSize, $serifBoldItalic);
         $blockSpan = (count($messageLines) - 1) * $lineHeight;
         $startY = (int) (820 - ($blockSpan / 2) + ($messageSize / 3));
 
