@@ -4,10 +4,11 @@
 
 @section('content')
     @php($selectedTemplate = old('card_template', session('card_template', 'chalkboard')))
+    @php($assetBase = rtrim(request()->getBaseUrl(), '/'))
     @php($templateImages = [
-        'chalkboard' => '/images/blackboard-card-template-v3.png',
-        'golden' => '/images/golden-card-template-v3.png',
-        'notebook' => '/images/notebook-card-template-v2.png',
+        'chalkboard' => $assetBase.'/images/blackboard-card-template-v3.png',
+        'golden' => $assetBase.'/images/golden-card-template-v3.png',
+        'notebook' => $assetBase.'/images/notebook-card-template-v2.png',
     ])
     <section class="card-maker section-wrap">
         <div class="card-form-copy">
