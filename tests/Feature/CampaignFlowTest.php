@@ -91,7 +91,7 @@ class CampaignFlowTest extends TestCase
 
         $this->withSession(['campaign_reel_id' => $reel->id])->post(route('campaign.store-card'), [
             'teacher_name' => 'Prof. Mehta',
-            'card_message' => 'Thank you for guiding me.',
+            'card_message' => substr(str_repeat('Thank you for guiding every step and always inspiring us. ', 6), 0, 250),
             'card_template' => 'golden',
         ])->assertRedirect(route('campaign.result'));
 
@@ -99,5 +99,6 @@ class CampaignFlowTest extends TestCase
         Storage::disk('local')->assertExists($reel->generated_card);
         $image = getimagesize(Storage::disk('local')->path($reel->generated_card));
         $this->assertSame([1080, 1620], [$image[0], $image[1]]);
+        $this->assertSame(250, strlen($reel->card_message));
     }
 }

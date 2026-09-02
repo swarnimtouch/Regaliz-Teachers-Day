@@ -173,7 +173,7 @@ class CampaignController extends Controller
     {
         $validated = $request->validate([
             'teacher_name' => ['required', 'string', 'max:80'],
-            'card_message' => ['required', 'string', 'max:240'],
+            'card_message' => ['required', 'string', 'max:250'],
             'card_template' => ['required', 'in:chalkboard,golden,notebook'],
         ]);
         $reel = $this->currentReel();

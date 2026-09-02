@@ -99,16 +99,16 @@ class PersonalizedCard
 
     private function renderChalkboard($image, DoctorReel $reel, int $primary, int $accent, int $text, string $font, string $bold): void
     {
-        $serifBold = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbd.ttf') ? 'C:\\Windows\\Fonts\\timesbd.ttf' : $bold;
-        $serifItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesi.ttf') ? 'C:\\Windows\\Fonts\\timesi.ttf' : $font;
-        $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : $serifItalic;
-        $this->center($image, 'Dear '.$reel->teacher_name.',', 56, 640, $accent, $serifBold);
+        $serifBold = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbd.ttf') ? 'C:\\Windows\\Fonts\\timesbd.ttf' : (is_file('/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf') ? '/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf' : $bold);
+        $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : (is_file('/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf') ? '/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf' : $font);
+        $this->center($image, 'Dear '.$reel->teacher_name.',', 48, 640, $accent, $serifBold);
         $messageLength = function_exists('mb_strlen') ? mb_strlen($reel->card_message) : strlen($reel->card_message);
         [$messageSize, $lineHeight] = match (true) {
-            $messageLength <= 45 => [58, 72],
-            $messageLength <= 90 => [50, 62],
-            $messageLength <= 150 => [42, 52],
-            default => [32, 40],
+            $messageLength <= 45 => [46, 58],
+            $messageLength <= 90 => [40, 50],
+            $messageLength <= 150 => [34, 43],
+            $messageLength <= 200 => [28, 35],
+            default => [24, 30],
         };
 
         $messageLines = $this->wrapToWidth($reel->card_message, $messageSize, $serifBoldItalic);
@@ -118,24 +118,23 @@ class PersonalizedCard
         foreach ($messageLines as $index => $line) {
             $this->center($image, $line, $messageSize, $startY + ($index * $lineHeight), $text, $serifBoldItalic);
         }
-        $this->center($image, 'WITH GRATITUDE,', 28, 995, $text, $bold);
-        $this->center($image, $reel->doctor_name, 48, 1055, $accent, $serifBold);
+        $this->center($image, 'WITH GRATITUDE,', 24, 995, $text, $bold);
+        $this->center($image, $reel->doctor_name, 40, 1050, $accent, $serifBold);
         $this->center($image, $reel->city, 29, 1105, $text, $font);
     }
 
     private function renderCertificate($image, DoctorReel $reel, int $primary, int $accent, int $text, string $font, string $bold): void
     {
-        $serifBold = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbd.ttf') ? 'C:\\Windows\\Fonts\\timesbd.ttf' : $bold;
-        $serifItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesi.ttf') ? 'C:\\Windows\\Fonts\\timesi.ttf' : $font;
-        $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : $serifItalic;
-        $this->center($image, 'Dear '.$reel->teacher_name.',', 56, 640, $accent, $serifBold);
+        $serifBold = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbd.ttf') ? 'C:\\Windows\\Fonts\\timesbd.ttf' : (is_file('/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf') ? '/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf' : $bold);
+        $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : (is_file('/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf') ? '/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf' : $font);
+        $this->center($image, 'Dear '.$reel->teacher_name.',', 48, 640, $accent, $serifBold);
         $messageLength = function_exists('mb_strlen') ? mb_strlen($reel->card_message) : strlen($reel->card_message);
         [$messageSize, $lineHeight] = match (true) {
-            $messageLength <= 30 => [58, 72],
-            $messageLength <= 60 => [50, 62],
-            $messageLength <= 110 => [42, 52],
-            $messageLength <= 170 => [37, 46],
-            default => [31, 39],
+            $messageLength <= 45 => [46, 58],
+            $messageLength <= 90 => [40, 50],
+            $messageLength <= 150 => [34, 43],
+            $messageLength <= 200 => [28, 35],
+            default => [24, 30],
         };
         $messageLines = $this->wrapToWidth($reel->card_message, $messageSize, $serifBoldItalic);
         $blockSpan = (count($messageLines) - 1) * $lineHeight;
@@ -144,23 +143,23 @@ class PersonalizedCard
         foreach ($messageLines as $index => $line) {
             $this->center($image, $line, $messageSize, $startY + ($index * $lineHeight), $text, $serifBoldItalic);
         }
-        $this->center($image, 'WITH GRATITUDE,', 29, 1015, $text, $bold);
-        $this->center($image, $reel->doctor_name, 49, 1090, $accent, $serifBold);
+        $this->center($image, 'WITH GRATITUDE,', 24, 1015, $text, $bold);
+        $this->center($image, $reel->doctor_name, 40, 1085, $accent, $serifBold);
         $this->center($image, $reel->city, 35, 1210, $text, $font);
     }
 
     private function renderNotebook($image, DoctorReel $reel, int $primary, int $accent, int $text, string $font, string $bold): void
     {
-        $serifBold = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbd.ttf') ? 'C:\\Windows\\Fonts\\timesbd.ttf' : $bold;
-        $serifItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesi.ttf') ? 'C:\\Windows\\Fonts\\timesi.ttf' : $font;
-        $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : $serifItalic;
-        $this->center($image, 'Dear '.$reel->teacher_name.',', 56, 640, $accent, $serifBold);
+        $serifBold = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbd.ttf') ? 'C:\\Windows\\Fonts\\timesbd.ttf' : (is_file('/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf') ? '/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf' : $bold);
+        $serifBoldItalic = PHP_OS_FAMILY === 'Windows' && is_file('C:\\Windows\\Fonts\\timesbi.ttf') ? 'C:\\Windows\\Fonts\\timesbi.ttf' : (is_file('/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf') ? '/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf' : $font);
+        $this->center($image, 'Dear '.$reel->teacher_name.',', 48, 640, $accent, $serifBold);
         $messageLength = function_exists('mb_strlen') ? mb_strlen($reel->card_message) : strlen($reel->card_message);
         [$messageSize, $lineHeight] = match (true) {
-            $messageLength <= 45 => [56, 70],
-            $messageLength <= 90 => [48, 60],
-            $messageLength <= 150 => [40, 50],
-            default => [32, 40],
+            $messageLength <= 45 => [46, 58],
+            $messageLength <= 90 => [40, 50],
+            $messageLength <= 150 => [34, 43],
+            $messageLength <= 200 => [28, 35],
+            default => [24, 30],
         };
         $messageLines = $this->wrapToWidth($reel->card_message, $messageSize, $serifBoldItalic);
         $blockSpan = (count($messageLines) - 1) * $lineHeight;
@@ -169,8 +168,8 @@ class PersonalizedCard
         foreach ($messageLines as $index => $line) {
             $this->center($image, $line, $messageSize, $startY + ($index * $lineHeight), $text, $serifBoldItalic);
         }
-        $this->center($image, 'WITH GRATITUDE,', 25, 1020, $text, $bold);
-        $this->center($image, $reel->doctor_name, 48, 1085, $accent, $serifBold);
+        $this->center($image, 'WITH GRATITUDE,', 24, 1020, $text, $bold);
+        $this->center($image, $reel->doctor_name, 40, 1080, $accent, $serifBold);
         $this->center($image, $reel->city, 27, 1140, $text, $font);
     }
 

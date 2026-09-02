@@ -24,7 +24,7 @@
                     <label><input type="radio" name="card_template" value="notebook" @checked($selectedTemplate === 'notebook')><span class="template-thumb template-notebook" style="background-image:url('{{ $templateImages['notebook'] }}')"><b>ELEGANT</b><small>Classic appreciation</small></span></label>
                 </fieldset>
                 <label>Teacher or mentor name <span>*</span><input id="teacherName" name="teacher_name" maxlength="80" value="" placeholder="Prof. Mehta" autocomplete="off" required></label>
-                <label>Your message <span>*</span><textarea id="cardMessage" name="card_message" maxlength="240" rows="5" placeholder="Thank you for believing in me and guiding my journey..." autocomplete="off" required></textarea><small><output id="messageCount">0</output>/240 characters</small></label>
+                <label>Your message <span>*</span><textarea id="cardMessage" name="card_message" maxlength="250" rows="5" placeholder="Thank you for believing in me and guiding my journey..." autocomplete="off" required></textarea><small><output id="messageCount">0</output>/250 characters</small></label>
                 <button class="btn-gold wide">Create my card →</button>
             </form>
         </div>
@@ -57,12 +57,9 @@
         const resizePreviewMessage = () => {
             const value = message.value.trim();
             const length = value.length;
-            const isGolden = preview.classList.contains('preview-golden');
-            const fontSize = isGolden
-                ? (length === 0 ? 26 : length <= 30 ? 30 : length <= 60 ? 26 : length <= 110 ? 22 : length <= 170 ? 19 : 16)
-                : (length === 0 || length <= 45 ? 30 : length <= 90 ? 25 : length <= 150 ? 21 : 17);
-            previewMessage.style.fontSize = `${fontSize}px`;
-            previewMessage.style.lineHeight = length > 150 ? '1.3' : '1.4';
+            const imageFontSize = length === 0 || length <= 45 ? 46 : length <= 90 ? 40 : length <= 150 ? 34 : length <= 200 ? 28 : 24;
+            previewMessage.style.fontSize = `${imageFontSize / 10.8}cqw`;
+            previewMessage.style.lineHeight = length > 150 ? '1.25' : '1.3';
 
             if (value) {
                 previewMessage.textContent = value;
