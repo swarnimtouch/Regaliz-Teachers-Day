@@ -145,7 +145,7 @@ class PersonalizedCard
         }
         $this->center($image, 'WITH GRATITUDE,', 24, 1015, $text, $bold);
         $this->center($image, $reel->doctor_name, 40, 1085, $accent, $serifBold);
-        $this->center($image, $reel->city, 35, 1210, $text, $font);
+        $this->center($image, $reel->city, 28, 1115, $text, $font);
     }
 
     private function renderNotebook($image, DoctorReel $reel, int $primary, int $accent, int $text, string $font, string $bold): void

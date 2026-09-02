@@ -35,7 +35,7 @@
             <div class="admin-live-status" aria-live="polite"></div>
             <div class="admin-results" data-admin-results>
                 @include('admin.partials.reels-table', ['items' => $reels])
-                <div class="pagination">{{ $reels->links() }}</div>
+                <div class="pagination">{{ $reels->onEachSide(1)->links('vendor.pagination.admin') }}</div>
             </div>
         </div>
     </section>

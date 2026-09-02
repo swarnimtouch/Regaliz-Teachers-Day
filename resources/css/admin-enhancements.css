@@ -109,3 +109,19 @@
 .admin-live-status:empty { display: none; }
 .admin-live-status:not(:empty)::before { content: ''; width: 34px; height: 34px; border: 4px solid #d7c69e; border-top-color: #214b34; border-radius: 50%; animation: admin-loader-spin .75s linear infinite; }
 @keyframes admin-loader-spin { to { transform: rotate(360deg); } }
+
+.table-actions { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.table-actions form { margin: 0; }
+.table-action { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 7px 11px; border: 1px solid #d7c69e; border-radius: 8px; background: #fffef8; font: 700 11px 'DM Sans', sans-serif; cursor: pointer; transition: .18s ease; }
+.table-action-view:hover { background: #214b34; border-color: #214b34; color: #fff; }
+.table-action-delete { color: #a53535; border-color: #e7c4c4; }
+.table-action-delete:hover { background: #a53535; border-color: #a53535; color: #fff; }
+.pagination { margin-top: 24px; }
+.admin-pagination { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding-top: 18px; border-top: 1px solid #eee5ce; }
+.admin-pagination-info { margin: 0; color: var(--muted); font-size: 12px; }
+.admin-pagination-links { display: flex; align-items: center; gap: 6px; }
+.admin-page-link { min-width: 38px; height: 38px; padding: 0 11px; display: inline-grid; place-items: center; border: 1px solid #d7c69e; border-radius: 9px; background: #fffef8; color: var(--deep); font-size: 12px; font-weight: 800; text-decoration: none; transition: .18s ease; }
+.admin-page-link:hover { background: #eef5e9; border-color: var(--deep); }
+.admin-page-link.is-current { background: var(--deep); border-color: var(--deep); color: var(--gold); }
+.admin-page-link.is-disabled { opacity: .42; cursor: not-allowed; }
+@media(max-width:700px){.admin-pagination{align-items:flex-start;flex-direction:column}.admin-pagination-links{width:100%;overflow-x:auto;padding-bottom:4px}.table-actions{flex-direction:column;align-items:stretch}.table-action{justify-content:center}}

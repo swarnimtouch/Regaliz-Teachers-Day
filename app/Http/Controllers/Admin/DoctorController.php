@@ -102,7 +102,7 @@ class DoctorController extends Controller
         }
         $doctorReel->delete();
 
-        return redirect()->route('admin.doctors.index')->with('success', 'Record deleted.');
+        return back()->with('success', 'Record deleted.');
     }
 
     public function export(Request $request): BinaryFileResponse

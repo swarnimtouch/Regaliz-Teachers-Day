@@ -1,10 +1,36 @@
 import './bootstrap';
 import DataTable from 'datatables.net-dt';
 import { toPng } from 'html-to-image';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 window.cardToPng = toPng;
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('submit', async event => {
+        const form = event.target.closest('[data-delete-submission]');
+        if (!form || form.dataset.confirmed === 'true') return;
+
+        event.preventDefault();
+        const result = await Swal.fire({
+            title: 'Delete this submission?',
+            text: `${form.dataset.name || 'This record'} and its generated media will be permanently deleted.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#a53535',
+            cancelButtonColor: '#214b34',
+            reverseButtons: true,
+            focusCancel: true,
+        });
+
+        if (result.isConfirmed) {
+            form.dataset.confirmed = 'true';
+            form.submit();
+        }
+    });
+
     const initialiseTables = root => root.querySelectorAll('.admin-datatable').forEach(table => {
         if (table.querySelector('.admin-table-empty-row')) {
             return;
