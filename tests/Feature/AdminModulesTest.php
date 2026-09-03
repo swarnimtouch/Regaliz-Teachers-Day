@@ -36,7 +36,8 @@ class AdminModulesTest extends TestCase
             ->assertViewHas('stats', fn (array $stats) => $stats === ['doctors' => 1, 'videos' => 1, 'audios' => 1, 'cards' => 1])
             ->assertDontSee('Last 7 days')
             ->assertDontSee('Content mix')
-            ->assertDontSee('Reports');
+            ->assertDontSee('Reports')
+            ->assertDontSee('Settings');
         $this->get(route('admin.videos.index'))->assertOk()->assertSee('Video recordings');
         $this->get(route('admin.audios.index'))->assertOk()->assertSee('Dr Admin Test');
         $this->get(route('admin.cards.index'))->assertOk()->assertSee('TDR-ADMIN-CARD')->assertDontSee('TDR-ADMIN-AUDIO');
