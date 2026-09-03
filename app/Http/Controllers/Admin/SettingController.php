@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class SettingController extends Controller
@@ -30,15 +31,19 @@ class SettingController extends Controller
 
         if ($request->hasFile('campaign_logo')) {
             $oldLogo = Setting::where('key', 'campaign_logo')->value('value');
-            if ($oldLogo && str_starts_with($oldLogo, 'uploads/branding/')) {
-                File::delete(public_path($oldLogo));
-            }
-
             $file = $request->file('campaign_logo');
             $name = 'campaign-logo-'.now()->timestamp.'.'.$file->extension();
-            File::ensureDirectoryExists(public_path('uploads/branding'));
-            $file->move(public_path('uploads/branding'), $name);
-            Setting::updateOrCreate(['key' => 'campaign_logo'], ['value' => 'uploads/branding/'.$name, 'type' => 'image']);
+            $path = $file->storeAs('branding', $name, 'public');
+
+            abort_unless($path, 500, 'Campaign logo could not be stored.');
+
+            Setting::updateOrCreate(['key' => 'campaign_logo'], ['value' => 'storage/'.$path, 'type' => 'image']);
+
+            if ($oldLogo && str_starts_with($oldLogo, 'storage/branding/')) {
+                Storage::disk('public')->delete(substr($oldLogo, strlen('storage/')));
+            } elseif ($oldLogo && str_starts_with($oldLogo, 'uploads/branding/')) {
+                File::delete(public_path($oldLogo));
+            }
         }
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(['key' => $key], ['value' => (string) $value, 'type' => is_bool($value) ? 'boolean' : 'string']);

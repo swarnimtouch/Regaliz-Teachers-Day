@@ -31,12 +31,12 @@
             <dt>Downloads</dt>
             <dd>{{ $reel->download_count }}</dd>
 
-            @if($reel->teacher_name)
+            @if($mediaType === 'card' && $reel->teacher_name)
                 <dt>Teacher name</dt>
                 <dd>{{ $reel->teacher_name }}</dd>
             @endif
 
-            @if($reel->card_message)
+            @if($mediaType === 'card' && $reel->card_message)
                 <dt>Message</dt>
                 <dd>{{ $reel->card_message }}</dd>
             @endif

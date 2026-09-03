@@ -31,9 +31,9 @@ class DoctorReelsExport implements FromQuery, ShouldAutoSize, WithHeadings, With
             ->when($this->filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->when($this->filters['media_type'] ?? null, function (Builder $query, string $type): void {
                 match ($type) {
-                    'video' => $query->whereNotNull('original_video'),
-                    'audio' => $query->whereHas('audioMessage'),
-                    'card' => $query->whereHas('greetingCard'),
+                    'video' => $query->where('content_type', 'video')->whereNotNull('original_video'),
+                    'audio' => $query->where('content_type', 'audio')->whereHas('audioMessage'),
+                    'card' => $query->where('content_type', 'card')->whereHas('greetingCard'),
                     default => null,
                 };
             })
