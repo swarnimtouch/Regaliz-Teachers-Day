@@ -19,7 +19,6 @@
             <a class="{{ request()->routeIs('admin.videos.*') ? 'active' : '' }}" href="{{ route('admin.videos.index') }}">Video recordings</a>
             <a class="{{ request()->routeIs('admin.audios.*') ? 'active' : '' }}" href="{{ route('admin.audios.index') }}">Audio messages</a>
             <a class="{{ request()->routeIs('admin.cards.*') ? 'active' : '' }}" href="{{ route('admin.cards.index') }}">Greeting cards</a>
-            <a class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">Reports</a>
             <a class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="{{ route('admin.settings.edit') }}">Settings</a>
         </nav>
 

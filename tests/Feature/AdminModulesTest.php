@@ -19,7 +19,15 @@ class AdminModulesTest extends TestCase
         $reel = DoctorReel::create(['doctor_id' => $doctor->id, 'reference_id' => 'TDR-ADMIN-TEST', 'consent' => true, 'content_type' => 'video']);
 
         $this->actingAs($admin);
-        $this->get(route('admin.dashboard'))->assertOk();
+        $this->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Total Doctors')
+            ->assertSee('Total Videos')
+            ->assertSee('Total Audios')
+            ->assertSee('Total Cards')
+            ->assertDontSee('Last 7 days')
+            ->assertDontSee('Content mix')
+            ->assertDontSee('Reports');
         $this->get(route('admin.videos.index'))->assertOk()->assertSee('Video recordings');
         $this->get(route('admin.audios.index'))->assertOk()->assertDontSee('Dr Admin Test');
         $this->get(route('admin.cards.index'))->assertOk()->assertDontSee('Dr Admin Test');
@@ -34,9 +42,9 @@ class AdminModulesTest extends TestCase
         $this->get(route('admin.doctors.index', ['search' => 'Not A Real Doctor']))
             ->assertOk()
             ->assertSee('No records found');
-        $this->get(route('admin.doctors.show', $reel))->assertOk()->assertSee('TDR-ADMIN-TEST');
+        $this->get(route('admin.doctors.show', $reel))->assertOk()->assertSee('TDR-ADMIN-TEST')->assertSee('Back');
         $this->get(route('admin.settings.edit'))->assertOk();
-        $this->get(route('admin.reports.index'))->assertOk();
+        $this->get('/admin/reports')->assertNotFound();
         $this->get(route('admin.profile.edit'))->assertOk()->assertSee('Change password');
 
         $this->get(route('admin.doctors.export'))

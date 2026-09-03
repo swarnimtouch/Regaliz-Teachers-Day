@@ -3,6 +3,17 @@
 @section('heading', $reel->doctor_name)
 
 @section('content')
+@php
+    $backRoute = match ($mediaType) {
+        'video' => route('admin.videos.index'),
+        'audio' => route('admin.audios.index'),
+        'card' => route('admin.cards.index'),
+        default => route('admin.doctors.index'),
+    };
+@endphp
+<div class="admin-actions">
+    <a class="btn-outline" href="{{ $backRoute }}"><i class="fa-solid fa-arrow-left"></i> Back</a>
+</div>
 <div class="detail-grid">
     <section class="admin-panel">
         <h2>Doctor details</h2>
